@@ -1,0 +1,24 @@
+.idea/
+target/
+**/target/
+*.class
+*.log
+*.jar
+*.war
+*.ear
+*.iml
+.settings/
+.DS_Store
+/.mvn/wrapper/maven-wrapper.jar
+/.mvn/wrapper/maven-wrapper.properties
+local.properties
+*.swp
+
+# IntelliJ
+out/
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+

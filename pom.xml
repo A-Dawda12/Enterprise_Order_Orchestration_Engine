@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<groupId>com.orderengine</groupId>
+	<artifactId>enterprise-order-orchestration-engine</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Enterprise Order Orchestration Engine</name>
+	<description>Camunda 8 orchestrated order fullfillment platform</description>
+
+	<properties>
+		<java.version>21</java.version>
+		<maven.compiler.source>21</maven.compiler.source>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<orderengine.version>1.0.0-SNAPSHOT</orderengine.version>
+		<openapi-generator.version>7.9.0</openapi-generator.version>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>order-common</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>order-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>payment-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>inventory-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>fraud-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>shipping-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.orderengine</groupId>
+				<artifactId>notification-client</artifactId>
+				<version>${orderengine.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<modules>
+		<module>channel</module>
+		<module>order-common</module>
+		<module>order-service</module>
+		<module>inventory-service</module>
+		<module>payment-service</module>
+		<module>shipping-service</module>
+		<module>order-orchestration-app</module>
+		<module>notification-service</module>
+		<module>fraud-service</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
