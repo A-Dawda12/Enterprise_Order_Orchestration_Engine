@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: order-service
+  profiles:
+    active: local
+
+server:
+  port: 8081
+  servelt:
+    context-path: /orders
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

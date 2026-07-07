@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: order-orchestration-app
+  profiles:
+    active: local
+
+server:
+  port: 8090
+  servelt:
+    context-path: /orchestration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
