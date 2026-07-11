@@ -20,6 +20,20 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+      image: redis:7-alpine
+      container_name: enterprise_redis
+      restart: unless-stopped
+      ports:
+        - "6379:6379"
+      healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 15s
+        timeout: 5s
+        retries: 10
+        start_period: 5s
+
 volumes:
   postgres_data:
+  redis-data:
 
