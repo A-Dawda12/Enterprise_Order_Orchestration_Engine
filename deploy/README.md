@@ -1,85 +1,120 @@
-Create the complete local deployment setup for the Enterprise Order Orchestration Engine.
+# Local deployment
 
-Requirements:
+Infrastructure and runtime layout for the Enterprise Order Orchestration Engine.
 
-## Overview
-The project consists of multiple Spring Boot microservices that run locally using Maven, while infrastructure components run using Docker Compose.
+**Plan:** [IMPLEMENTATION-PHASES.md](../docs/IMPLEMENTATION-PHASES.md) (Phase 1)
 
-### Spring Boot Services
-| Service | Port | Context Path | Health Endpoint |
-|---------|------|--------------|----------------|
-| order-service | 8081 | /orders | GET /orders/v1/health |
-| inventory-service | 8082 | /inventory | GET /inventory/v1/health |
-| payment-service | 8083 | /payments | GET /payments/v1/health |
-| fraud-service | 8084 | /fraud | GET /fraud/v1/health |
-| shipping-service | 8085 | /shipping | GET /shipping/v1/health |
-| notification-service | 8086 | /notifications | GET /notifications/v1/health |
-| order-orchestration-app | 8090 | /orchestration | GET /orchestration/v1/health |
-
-These services should NOT be containerized initially and will be started via Maven.
-
-## Infrastructure (Docker Compose)
-
-Phase 1.1
-- PostgreSQL
-- Port: 5432
-- Username: postgres
-- Password: postgres
-
-Create the following databases automatically on startup:
-
-- order_db
-- inventory_db
-- payment_db
-- fraud_db
-- shipping_db
-- notification_db
-
-JDBC URLs:
-
-jdbc:postgresql://localhost:5432/order_db
-jdbc:postgresql://localhost:5432/inventory_db
-jdbc:postgresql://localhost:5432/payment_db
-jdbc:postgresql://localhost:5432/fraud_db
-jdbc:postgresql://localhost:5432/shipping_db
-jdbc:postgresql://localhost:5432/notification_db
-
-Future infrastructure (prepare placeholders in docker-compose):
-
-- Redis (6379)
-- Kafka (9092)
-- Zeebe Gateway (26500)
-- Operate UI (8088)
-- Tasklist UI (8089)
-- Prometheus (9090)
-- Grafana (3000)
-
-These can remain commented or disabled for now.
-
-## Folder Structure
-
-deploy/
-├── docker-compose.yml
-├── postgres/
-│   ├── init.sql
-│   └── README.md
-├── bpmn/
-├── prometheus/
-│   └── prometheus.yml
-├── grafana/
-│   └── dashboards/
-└── README.md
-
-## PostgreSQL Initialization
-
-Use an initialization SQL script that creates all six databases automatically when the PostgreSQL container starts.
-
-## README
-
-Generate a README containing:
-
-Quick Start
+## Quick start
 
 ```bash
+# From repo root
 cd deploy
+docker compose up -d postgres redis
+```
+
+## Port matrix
+
+### Spring Boot services (Phase 0 scaffold — run via Maven locally)
+
+| Service | Port | Context path | Health |
+| ----------------------- | ---- | ---------------- | ------------------------------ |
+| order-service | 8081 | `/orders` | `GET /orders/v1/health` |
+| inventory-service | 8082 | `/inventory` | `GET /inventory/v1/health` |
+| payment-service | 8083 | `/payments` | `GET /payments/v1/health` |
+| fraud-service | 8084 | `/fraud` | `GET /fraud/v1/health` |
+| shipping-service | 8085 | `/shipping` | `GET /shipping/v1/health` |
+| notification-service | 8086 | `/notifications` | `GET /notifications/v1/health` |
+| order-orchestration-app | 8090 | `/orchestration` | `GET /orchestration/v1/health` |
+
+### Infrastructure (Phase 1 — Docker Compose)
+
+| Component | Port | Status |
+| -------------------- | ----- | ---------------------- |
+| PostgreSQL | 5432 | **Active** (Phase 1.1) |
+| Redis | 6379 | **Active** (Phase 1.2) |
+| Kafka | 9092 | Planned (Phase 1.3) |
+| Zeebe gateway (gRPC) | 26500 | Planned (Phase 1.4) |
+| Operate UI | 8088 | Planned (Phase 1.4) |
+| Tasklist UI | 8089 | Planned (Phase 1.4) |
+| Prometheus | 9090 | Planned (Phase 1.5) |
+| Grafana | 3000 | Planned (Phase 1.5) |
+
+## PostgreSQL (Phase 1.1)
+
+| Database | Used by |
+| ----------------- | -------------------- |
+| `order_db` | order-service |
+| `inventory_db` | inventory-service |
+| `payment_db` | payment-service |
+| `fraud_db` | fraud-service |
+| `shipping_db` | shipping-service |
+| `notification_db` | notification-service |
+
+**Credentials (local only):** user `postgres`, password `postgres`
+
+**JDBC URL examples:**
+
+```text
+jdbc:postgresql://localhost:5432/order_db
+jdbc:postgresql://localhost:5432/inventory_db
+```
+
+### Verify PostgreSQL
+
+```bash
 docker compose up -d postgres
+docker compose ps
+docker compose exec postgres psql -U postgres -c "\l"
+```
+
+Expected: six `*_db` databases listed.
+
+---
+
+## Redis (Phase 1.2)
+
+Used for:
+
+- Idempotency keys (Phase 2.2)
+- Inventory locks (Phase 4.1)
+
+**Connection (local):**
+
+```text
+Host: localhost
+Port: 6379
+Password: (none)
+```
+
+### Verify Redis
+
+```bash
+docker compose up -d redis
+docker compose ps
+docker compose exec redis redis-cli ping
+```
+
+Expected output:
+
+```text
+PONG
+```
+
+---
+
+## BPMN
+
+Process definitions live under:
+
+```text
+deploy/bpmn/
+```
+
+They are deployed to the Zeebe broker beginning in **Phase 6**.
+
+---
+
+## Observability
+
+- Prometheus configuration: `deploy/prometheus/prometheus.yml`
+- Grafana dashboards: `deploy/grafana/dashboards/` (Phase 10)
