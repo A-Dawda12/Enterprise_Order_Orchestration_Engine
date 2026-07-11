@@ -1,0 +1,21 @@
+# Global settings for Prometheus
+global:
+  scrape_interval: 15s          # Default scrape interval for all jobs
+  evaluation_interval: 15s      # How frequently to evaluate rules
+  external_labels:
+    instance: 'prometheus-server'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: order-engine
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - host.docker.internal:8081
+          - host.docker.internal:8082
+          - host.docker.internal:8083
+          - host.docker.internal:8084
+          - host.docker.internal:8085
+          - host.docker.internal:8086
+          - host.docker.internal:8090

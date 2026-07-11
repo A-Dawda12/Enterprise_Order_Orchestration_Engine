@@ -1,5 +1,4 @@
 .idea/
-target/
 **/target/
 *.class
 *.log
@@ -13,6 +12,16 @@ target/
 /.mvn/wrapper/maven-wrapper.properties
 local.properties
 *.swp
+bin/
+.project
+.classpath
+
+# maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
 
 # IntelliJ
 out/
@@ -21,4 +30,18 @@ out/
 
 # VS Code
 .vscode/
+
+#Docker local data
+deploy/data
+
+# Generated OpenAPI client code
+**/src/main/java/com/orderengine/client/**/gen/
+
+#logs
+*.log
+logs/
+
+#OS
+.DS_Store
+Thumbs.db
 
