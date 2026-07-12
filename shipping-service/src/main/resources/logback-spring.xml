@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <springProperty scope="context" name="LOG_FILE" source="logging.file.name"/>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="shipping-service"/>
 
     <springProfile name="local,dev">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%d{ISO8601} [%thread] %-5level ${APP_NAME} %logger{36} - %msg%n</pattern>
+                <pattern>%d{ISO8601} [%thread] %-5level ${APP_NAME} [%X{correlationId:-}] [%X{traceId:-}] %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
         <logger name="com.orderengine.shipping" level="DEBUG"/>
+        <logger name="com.orderenngine.common.filter.ApiAccessLogFilter" level="INFO"/>
     </springProfile>
 </configuration>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="fraud-service"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="SERVICE_NAME"/>
 
     <springProfile name="local,dev">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -12,7 +12,7 @@
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
-        <logger name="com.orderengine.fraud" level="DEBUG"/>
+        <logger name="PACKAGE_ROOT" level="DEBUG"/>
         <logger name="com.orderenngine.common.filter.ApiAccessLogFilter" level="INFO"/>
     </springProfile>
 </configuration>
