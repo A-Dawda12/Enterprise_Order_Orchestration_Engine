@@ -8,6 +8,11 @@ import org.springframework.context.annotation.ComponentScan;
 
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ComponentScan(basePackageClasses = {CorrelationIdFilter.class, ApiAccessLogFilter.class, GlobalExceptionHandler.class})
+@ComponentScan(basePackageClasses = {
+        CorrelationIdFilter.class,
+        ApiAccessLogFilter.class,
+        GlobalExceptionHandler.class,
+        ApiErrorResponseWriter.class
+})
 public class OrderCommonWebAutoConfiguration {
 }
