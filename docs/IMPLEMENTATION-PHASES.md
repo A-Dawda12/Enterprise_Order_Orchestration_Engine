@@ -227,9 +227,9 @@ Cross-cutting concerns live in `order-common` and are reused by every service. L
 - [ ] `order-common` published to local Maven repo
 - [x] Standard error response matches [LLD §2.2](./LLD.md#22-standard-error-response)
 - [x] `ApiAccessLogFilter` logs `API IN` / `API OUT` with correlation ID
-- [ ] `IdempotencyFilter` skeleton (Redis-backed, used in Phase 3+)
-- [ ] `logback-spring.xml` template copied to every module
-- [ ] `HandlerActivityName` and `ActivityParameters` constants in `order-common` (or orchestration module)
+- [x] `IdempotencyFilter` skeleton (Redis-backed, used in Phase 3+)
+- [x] `logback-spring.xml` template copied to every module
+- [x] `HandlerActivityName` and `ActivityParameters` constants in `order-common` (or orchestration module)
 
 ### Steps
 
@@ -241,18 +241,18 @@ Cross-cutting concerns live in `order-common` and are reused by every service. L
 
 #### 2.2 order-common — idempotency
 
-- [ ] `IdempotencyFilter` — `Idempotency-Key` header, Redis `SET NX` with TTL 24h
-- [ ] `IdempotencyConfig` — Redis connection from env
+- [x] `IdempotencyFilter` — `Idempotency-Key` header, Redis `SET NX` with TTL 24h
+- [x] `IdempotencyConfig` — Redis connection from env
 
 #### 2.3 Logging template
 
-- [ ] Create canonical `logback-spring.xml` per [LLD §12](./LLD.md#12-logging-configuration-logback-springxml)
-- [ ] Copy to each service; set `APP_NAME` / logger package per service
+- [x] Create canonical `logback-spring.xml` per [LLD §12](./LLD.md#12-logging-configuration-logback-springxml)
+- [x] Copy to each service; set `APP_NAME` / logger package per service
 
 #### 2.4 Orchestration constants
 
-- [ ] `HandlerActivityName.java` — all activity names from [IMPLEMENTATION-PATTERNS §4](./IMPLEMENTATION-PATTERNS.md#4-granular-activity-catalog)
-- [ ] `ActivityParameters.java` — process variable keys from [IMPLEMENTATION-PATTERNS §5](./IMPLEMENTATION-PATTERNS.md#5-process-variables-activityparameters)
+- [x] `HandlerActivityName.java` — all activity names from [IMPLEMENTATION-PATTERNS §4](./IMPLEMENTATION-PATTERNS.md#4-granular-activity-catalog)
+- [x] `ActivityParameters.java` — process variable keys from [IMPLEMENTATION-PATTERNS §5](./IMPLEMENTATION-PATTERNS.md#5-process-variables-activityparameters)
 
 #### 2.5 Trace propagation stub
 
