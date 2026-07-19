@@ -38,9 +38,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-jackson2</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-otel</artifactId>
+		</dependency>
 
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
