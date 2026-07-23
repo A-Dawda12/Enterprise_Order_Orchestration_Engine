@@ -5,7 +5,7 @@ CREATE TABLE orders (
     customer_id        VARCHAR(36) NOT NULL,
     status             VARCHAR(32) NOT NULL,
     total_amount       DECIMAL(12,2) NOT NULL,
-    currency           CHAR(3) NOT NULL DEFAULT 'USD',
+    currency           CHAR(3) NOT NULL DEFAULT 'INR',
     workflow_key       VARCHAR(64),
     shipping_address   JSONB NOT NULL,
     created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
