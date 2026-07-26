@@ -256,12 +256,12 @@ Cross-cutting concerns live in `order-common` and are reused by every service. L
 
 #### 2.5 Trace propagation stub
 
-- [ ] Add `micrometer-tracing` dependency to parent POM
-- [ ] `traceparent` propagation in `RestClient`/`WebClient` builder utility
+- [x] Add `micrometer-tracing` dependency to parent POM
+- [x] `traceparent` propagation in `RestClient`/`WebClient` builder utility
 
 ### Verification
 
-- [ ] Small `@SpringBootTest` in `order-common` proves filters set MDC correctly
+- [x] Small `@SpringBootTest` in `order-common` proves filters set MDC correctly
 - [ ] Sample log line contains `correlationId`, `service`, `httpPath`
 
 ---
@@ -286,13 +286,13 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 
 #### 3.1 Persistence
 
-- [ ] Flyway migration `V1__create_orders.sql` per LLD §5.1
-- [ ] JPA entities: `Order`, `OrderItem`, `OrderEvent`, `Invoice`
-- [ ] Repositories + `OrderService` / `OrderServiceImpl`
+- [x] Flyway migration `V1__create_orders.sql` per LLD §5.1
+- [x] JPA entities: `Order`, `OrderItem`, `OrderEvent`, `Invoice`
+- [x] Repositories + `OrderService` / `OrderServiceImpl`
 
 #### 3.2 REST controllers
 
-- [ ] `OrderController` — `POST /v1/orders`, `GET /v1/orders/{id}`, `GET /v1/orders`
+- [x] `OrderController` — `POST /v1/orders`, `GET /v1/orders/{id}`, `GET /v1/orders`
 - [ ] `OrderValidationController` — `POST /v1/orders/{id}/validate`
 - [ ] `OrderInvoiceController` — `POST /v1/orders/{id}/invoice`
 - [ ] `OrderStatusController` — `PATCH /v1/orders/{id}/status`

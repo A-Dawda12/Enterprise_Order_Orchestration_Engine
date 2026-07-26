@@ -55,9 +55,11 @@ docker compose up -d postgres redis
 **JDBC URL examples:**
 
 ```text
-jdbc:postgresql://localhost:5432/order_db
-jdbc:postgresql://localhost:5432/inventory_db
+jdbc:postgresql://localhost:5433/order_db
+jdbc:postgresql://localhost:5433/inventory_db
 ```
+
+Inside the Docker network(other containers), still uses `postgres:5432'
 
 ### Verify PostgreSQL
 

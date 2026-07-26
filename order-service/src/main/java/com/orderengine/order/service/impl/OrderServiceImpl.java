@@ -45,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderId(UUID.randomUUID().toString());
         order.setCustomerId(customerId);
         order.setStatus(OrderStatus.CREATED);
+        order.setTotalAmount(total);
         order.setCurrency(currency == null || currency.isBlank() ? DEFAULT_CURRENCY : currency);
         order.setShippingAddress(shippingAddress);
 

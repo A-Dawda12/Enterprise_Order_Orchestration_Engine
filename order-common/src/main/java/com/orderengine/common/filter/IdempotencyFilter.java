@@ -49,12 +49,13 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String idempotencyKey = request.getHeader(OrderEngineConstants.IDEMPOTENCY_KEY_HEADER);
         if(idempotencyKey == null || idempotencyKey.isBlank()) {
-            errorResponseWriter.write(
-                    response,
-                    ErrorCode.BAD_REQUEST,
-                    "Missing required header: " + OrderEngineConstants.IDEMPOTENCY_KEY_HEADER,
-                    request.getRequestURI()
-            );
+//            errorResponseWriter.write(
+//                    response,
+//                    ErrorCode.BAD_REQUEST,
+//                    "Missing required header: " + OrderEngineConstants.IDEMPOTENCY_KEY_HEADER,
+//                    request.getRequestURI()
+//            );
+            filterChain.doFilter(request, response);
             return;
         }
         try{

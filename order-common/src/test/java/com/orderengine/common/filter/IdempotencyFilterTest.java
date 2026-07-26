@@ -66,4 +66,15 @@ public class IdempotencyFilterTest {
         verify(store, never()).find(any());
     }
 
+    @Test
+    void continuesWhenIdempotencyKeyMissing() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/orders");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        verify(store, never()).find(any());
+    }
+
 }
