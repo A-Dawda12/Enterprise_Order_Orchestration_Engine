@@ -22,5 +22,15 @@ public interface OrderService {
 
     Page<OrderEntity> listOrders(OrderStatus status, Pageable pageable);
 
+    ValidationResult validateOrder(String orderId);
+
+    record ValidationResult(
+        boolean valid,
+        boolean validItems,
+        boolean validAddress,
+        List<String> errors
+    ){
+    }
+
     record NewOrderItem(String sku, int quantity, BigDecimal unitPrice) {}
 }

@@ -30,7 +30,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        log.info("createOrder customerId={} itemCount={}", request.items().size());
+        log.info("createOrder customerId={} itemCount={}", request.customerId(), request.items().size());
         OrderEntity created = orderService.createOrder(
                 request.customerId(),
                 OrderApiMapper.toNewItems(request),

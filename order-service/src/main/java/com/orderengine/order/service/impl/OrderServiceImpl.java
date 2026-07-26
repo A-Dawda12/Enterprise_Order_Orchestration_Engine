@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -88,5 +89,75 @@ public class OrderServiceImpl implements OrderService {
         event.setEventType(eventType);
         event.setPayload(payload);
         orderEventRepository.save(event);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ValidationResult validateOrder(String orderId) {
+        OrderEntity order = getOrder(orderId);
+        List<String> errors = new ArrayList<>();
+
+        boolean validItems = validateItems(order.getItems(), errors);
+        boolean validAddress = validateAddress(order.getShippingAddress(), errors);
+
+        return new ValidationResult(validItems && validAddress, validItems, validAddress, List.copyOf(errors));
+    }
+
+    private boolean validateAddress(ShippingAddress address, List<String> errors) {
+        if(address == null) {
+            errors.add("shippinAddress is required");
+            return false;
+        }
+        boolean ok = true;
+        if(isBlank(address.line1())){
+            errors.add("shippingAddress.line1 must not be blank");
+            ok = false;
+        }
+        if(isBlank(address.city())){
+            errors.add("shippingAddress.city must not be blank");
+            ok = false;
+        }
+        if(isBlank(address.state())){
+            errors.add("shippingAddress.state must not be blank");
+            ok = false;
+        }
+        if(isBlank(address.postalCode())){
+            errors.add("shippingAddress.postalCode must not be blank");
+            ok = false;
+        }
+        if(isBlank(address.country())){
+            errors.add("shippingAddress.country must not be blank");
+            ok = false;
+        }
+        return ok;
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private boolean validateItems(List<OrderItemEntity> items, List<String> errors) {
+        if(items == null || items.isEmpty()) {
+            errors.add("Order must contain at least one item");
+        }
+
+        boolean ok = true;
+        for(int i = 0; i < items.size(); i++) {
+            OrderItemEntity item = items.get(i);
+            String prefix = "items[" + i + "]";
+            if(item.getSku() == null || item.getSku().isBlank()) {
+                errors.add(prefix + ".sku must not be blank");
+                ok = false;
+            }
+            if(item.getQuantity() <= 0) {
+                errors.add(prefix + ".quantity must be greater than 0");
+                ok = false;
+            }
+            if(item.getUnitPrice() == null || item.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0){
+                errors.add(prefix + ".unitPrice must be greater than 0");
+                ok = false;
+            }
+        }
+        return ok;
     }
 }

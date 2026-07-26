@@ -293,7 +293,7 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 #### 3.2 REST controllers
 
 - [x] `OrderController` — `POST /v1/orders`, `GET /v1/orders/{id}`, `GET /v1/orders`
-- [ ] `OrderValidationController` — `POST /v1/orders/{id}/validate`
+- [x] `OrderValidationController` — `POST /v1/orders/{id}/validate`
 - [ ] `OrderInvoiceController` — `POST /v1/orders/{id}/invoice`
 - [ ] `OrderStatusController` — `PATCH /v1/orders/{id}/status`
 
