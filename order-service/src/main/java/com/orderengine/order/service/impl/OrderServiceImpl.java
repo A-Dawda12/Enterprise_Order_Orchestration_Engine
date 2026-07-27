@@ -3,6 +3,7 @@ package com.orderengine.order.service.impl;
 import com.orderengine.common.error.ErrorCode;
 import com.orderengine.common.error.OrderEngineException;
 import com.orderengine.order.domain.*;
+import com.orderengine.order.repository.InvoiceRepository;
 import com.orderengine.order.repository.OrderEventRepository;
 import com.orderengine.order.repository.OrderRepository;
 import com.orderengine.order.service.OrderService;
@@ -21,13 +22,16 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     private static final String DEFAULT_CURRENCY = "INR";
+    private static final String STUB_PDF_URL_TEMPLATE = "https://storage.local/invoices/%s.pdf";
 
     private final OrderRepository orderRepository;
     private final OrderEventRepository orderEventRepository;
+    private final InvoiceRepository invoiceRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderEventRepository orderEventRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderEventRepository orderEventRepository, InvoiceRepository invoiceRepository) {
         this.orderRepository = orderRepository;
         this.orderEventRepository = orderEventRepository;
+        this.invoiceRepository = invoiceRepository;
     }
 
     @Override
@@ -160,4 +164,30 @@ public class OrderServiceImpl implements OrderService {
         }
         return ok;
     }
+
+    @Override
+    @Transactional
+    public InvoiceEntity generateInvoice(String orderId, String paymentId) {
+        if(paymentId == null || paymentId.isBlank()) {
+            throw new OrderEngineException(ErrorCode.BAD_REQUEST, "paymentId must not be blank");
+        }
+
+        OrderEntity order = getOrder(orderId);
+
+        InvoiceEntity invoice = new InvoiceEntity();
+        invoice.setInvoiceId(UUID.randomUUID().toString());
+        invoice.setPaymentId(paymentId.trim());
+        invoice.setOrderId(order.getOrderId());
+        invoice.setAmount(order.getTotalAmount());
+        invoice.setPdfUrl(STUB_PDF_URL_TEMPLATE.formatted(invoice.getInvoiceId()));
+
+        InvoiceEntity saved = invoiceRepository.save(invoice);
+        appendEvent(order.getOrderId(), "order.invoice.generated", Map.of(
+                "invoiceId", saved.getInvoiceId(),
+                "paymentId", saved.getPaymentId(),
+                "amount", saved.getAmount()
+        ));
+        return saved;
+    }
+
 }

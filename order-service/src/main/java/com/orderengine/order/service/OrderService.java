@@ -1,5 +1,6 @@
 package com.orderengine.order.service;
 
+import com.orderengine.order.domain.InvoiceEntity;
 import com.orderengine.order.domain.OrderEntity;
 import com.orderengine.order.domain.OrderStatus;
 import com.orderengine.order.domain.ShippingAddress;
@@ -23,6 +24,8 @@ public interface OrderService {
     Page<OrderEntity> listOrders(OrderStatus status, Pageable pageable);
 
     ValidationResult validateOrder(String orderId);
+
+    InvoiceEntity generateInvoice(String orderId, String paymentId);
 
     record ValidationResult(
         boolean valid,
