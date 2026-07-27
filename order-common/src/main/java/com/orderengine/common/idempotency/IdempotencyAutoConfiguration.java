@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnBean(StringRedisTemplate.class)
-@ConditionalOnProperty(prefix = "orderengine.idempotency", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "orderengine.idempotency", name = "enabled", havingValue = "true", matchIfMissing = false)
 @EnableConfigurationProperties(IdempotencyProperties.class)
 public class IdempotencyAutoConfiguration {
 

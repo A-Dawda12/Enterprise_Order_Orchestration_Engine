@@ -8,6 +8,7 @@ import com.orderengine.common.logging.MdcKeys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleUnecpectedException(
+    public ResponseEntity<ApiErrorResponse> handleUnexpectedException(
             Exception ex,
             HttpServletRequest request
     ) {
@@ -70,5 +71,21 @@ public class GlobalExceptionHandler {
                 details
         );
         return ResponseEntity.status(errorCode.status()).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnreadableBody(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ){
+        String reason = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+        return buildResponse(
+                ErrorCode.VALIDATION_ERROR,
+                "Cannot read request body: " + reason,
+                request.getRequestURI(),
+                List.of()
+        );
     }
 }
