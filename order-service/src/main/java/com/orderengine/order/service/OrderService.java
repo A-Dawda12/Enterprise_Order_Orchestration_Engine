@@ -27,6 +27,8 @@ public interface OrderService {
 
     InvoiceEntity generateInvoice(String orderId, String paymentId);
 
+    OrderEntity updateStatus(String orderId, OrderStatus status, String reason);
+
     record ValidationResult(
         boolean valid,
         boolean validItems,

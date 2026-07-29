@@ -295,7 +295,7 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 - [x] `OrderController` — `POST /v1/orders`, `GET /v1/orders/{id}`, `GET /v1/orders`
 - [x] `OrderValidationController` — `POST /v1/orders/{id}/validate`
 - [x] `OrderInvoiceController` — `POST /v1/orders/{id}/invoice`
-- [ ] `OrderStatusController` — `PATCH /v1/orders/{id}/status`
+- [x] `OrderStatusController` — `PATCH /v1/orders/{id}/status`
 
 #### 3.3 Business rules
 
@@ -307,7 +307,7 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 
 - [ ] Wire `order-common` filters
 - [ ] **Enable idempotency** -set `orderengine.idempotency.enabbled=true`
-  (Redis required); enforce `Idempotency-Key` ON POST/PUT/PATCH in `IdempotencyFilter`
+  (Redis required); enforce `Idempotency-Key` ON POST/PUT/PATCH in `IdempotencyFilter-`
 - [ ] `logback-spring.xml` for `order-service`
 - [ ] `application.yml`: port `8081`, context-path `/orders`, Postgres URL
 

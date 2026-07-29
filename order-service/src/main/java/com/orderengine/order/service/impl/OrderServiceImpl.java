@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -187,6 +184,28 @@ public class OrderServiceImpl implements OrderService {
                 "paymentId", saved.getPaymentId(),
                 "amount", saved.getAmount()
         ));
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public OrderEntity updateStatus(String orderId, OrderStatus status, String reason) {
+        if(status == null){
+            throw new OrderEngineException(ErrorCode.BAD_REQUEST, "status must not be null");
+        }
+
+        OrderEntity order = getOrder(orderId);
+        OrderStatus previous = order.getStatus();
+        order.setStatus(status);
+        OrderEntity saved = orderRepository.save(order);
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("from", previous.name());
+        payload.put("to", saved.getStatus().name());
+        if(reason != null && !reason.isBlank()) {
+            payload.put("reason", reason.trim());
+        }
+        appendEvent(saved.getOrderId(), "order.status.changed", payload);
         return saved;
     }
 
