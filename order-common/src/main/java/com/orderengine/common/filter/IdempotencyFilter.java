@@ -49,13 +49,12 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String idempotencyKey = request.getHeader(OrderEngineConstants.IDEMPOTENCY_KEY_HEADER);
         if(idempotencyKey == null || idempotencyKey.isBlank()) {
-//            errorResponseWriter.write(
-//                    response,
-//                    ErrorCode.BAD_REQUEST,
-//                    "Missing required header: " + OrderEngineConstants.IDEMPOTENCY_KEY_HEADER,
-//                    request.getRequestURI()
-//            );
-            filterChain.doFilter(request, response);
+            errorResponseWriter.write(
+                    response,
+                    ErrorCode.BAD_REQUEST,
+                    "Missing required header: " + OrderEngineConstants.IDEMPOTENCY_KEY_HEADER,
+                    request.getRequestURI()
+            );
             return;
         }
         try{
@@ -82,7 +81,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
         }
 
         if(!idempotencyResponseStore.tryAcquire(idempotencyKey)) {
-            if(idempotencyResponseStore.tryAcquire(idempotencyKey)) {
+            if(idempotencyResponseStore.isProcessing(idempotencyKey)) {
                 throw new OrderEngineException(
                         ErrorCode.CONFLICT,
                         "Request with this idempotency key is already in progress"

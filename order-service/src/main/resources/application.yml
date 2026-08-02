@@ -7,6 +7,10 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/order_db
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -38,5 +42,6 @@ management:
 
 
 orderengine:
-  idempodency:
-    enabled: false
+  idempotency:
+    enabled: true
+    ttl: 24h

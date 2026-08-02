@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderengine.common.filter.IdempotencyFilter;
 import com.orderengine.common.web.ApiErrorResponseWriter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @AutoConfiguration
+@AutoConfigureAfter(name = "com.orderengine.common.web.OrderCommonWebAutoConfiguration")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnBean(StringRedisTemplate.class)
