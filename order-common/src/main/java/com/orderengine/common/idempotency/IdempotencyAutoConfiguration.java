@@ -12,7 +12,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @AutoConfiguration
-@AutoConfigureAfter(name = "com.orderengine.common.web.OrderCommonWebAutoConfiguration")
+@AutoConfigureAfter(name = {
+        "org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration",
+        "com.orderengine.common.web.OrderCommonWebAutoConfiguration"
+})
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(StringRedisTemplate.class)
 @ConditionalOnBean(StringRedisTemplate.class)
