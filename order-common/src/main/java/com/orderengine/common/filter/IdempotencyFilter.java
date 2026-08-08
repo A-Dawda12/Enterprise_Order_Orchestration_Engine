@@ -81,7 +81,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
         }
 
         if(!idempotencyResponseStore.tryAcquire(idempotencyKey)) {
-            if(idempotencyResponseStore.tryAcquire(idempotencyKey)) {
+            if(idempotencyResponseStore.isProcessing(idempotencyKey)) {
                 throw new OrderEngineException(
                         ErrorCode.CONFLICT,
                         "Request with this idempotency key is already in progress"

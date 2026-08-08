@@ -1,6 +1,7 @@
 package com.orderengine.common.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.orderengine.common.idempotency.CachedResponse;
 import com.orderengine.common.idempotency.IdempotencyResponseStore;
 import com.orderengine.common.web.ApiErrorResponseWriter;
@@ -34,7 +35,9 @@ public class IdempotencyFilterTest {
 
     @BeforeEach
     void setUp() {
-        errorResponseWriter = new ApiErrorResponseWriter((new ObjectMapper()));
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        errorResponseWriter = new ApiErrorResponseWriter(objectMapper);
         filter = new IdempotencyFilter(store, errorResponseWriter);
     }
 
@@ -63,6 +66,20 @@ public class IdempotencyFilterTest {
         filter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
+        verify(store, never()).find(any());
+    }
+
+    @Test
+    void rejectWhenIdempotencyKeyMissing() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/v1/orders");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, filterChain);
+
+//        verify(filterChain).doFilter(request, response);
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.getContentAsString()).contains("Missing required header: Idempotency-Key");
+        verify(filterChain, never()).doFilter(request, response);
         verify(store, never()).find(any());
     }
 

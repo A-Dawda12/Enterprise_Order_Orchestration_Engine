@@ -3,10 +3,32 @@ spring:
     name: order-service
   profiles:
     active: local
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/order_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  http:
+    converters:
+      preferred-json-mapper: jackson2
 
 server:
   port: 8081
-  servelt:
+  servlet:
     context-path: /orders
 
 management:
@@ -17,3 +39,17 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+
+orderengine:
+  idempotency:
+    enabled: true
+    ttl: 24h
+
+springdoc:
+  api-docs:
+    path: v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    operation-sorter: method
+  show-actuator: false
