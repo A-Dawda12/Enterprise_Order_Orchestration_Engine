@@ -6,6 +6,8 @@ import com.orderengine.order.api.dto.InvoiceRequest;
 import com.orderengine.order.api.dto.InvoiceResponse;
 import com.orderengine.order.domain.InvoiceEntity;
 import com.orderengine.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/v1/orders")
+@Tag(name = "Orders", description = "Create, get and list orders")
 public class OrderInvoiceController {
 
     private final OrderService orderService;
@@ -24,6 +27,7 @@ public class OrderInvoiceController {
     }
 
     @PostMapping("/{orderId}/invoice")
+    @Operation(summary = "Generate invoice", description = "Generates an invoice row, pdfUrl is a stub until storage exists")
     public ResponseEntity<InvoiceResponse> generateInvoice(
             @PathVariable String orderId,
             @Valid @RequestBody InvoiceRequest request

@@ -280,7 +280,7 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 * [ ] PostgreSQL schema from [LLD §5.1](./LLD.md#51-order-service--order_db) applied
 * [ ] `POST /v1/orders` creates order in `CREATED` status (does **not** start workflow yet — Phase 6)
 * [ ] `GET`, `PATCH /status`, `POST /validate`, `POST /invoice` work
-* [ ] OpenAPI at `/orders/v3/api-docs`
+* [x] OpenAPI at `/orders/v3/api-docs`
 * [ ] Actuator health + prometheus at `/orders/actuator/prometheus`
 * [ ] Postman/curl smoke test documented
 
@@ -324,8 +324,10 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 
 #### 3.5 OpenAPI
 
-* [ ] SpringDoc dependency; annotate controllers
-* [ ] Export spec to `order-service/src/main/resources/openapi/order-api.yaml`
+* [x] SpringDoc dependency; annotate controllers
+* [x] Export spec to `order-service/src/main/resources/openapi/order-api.yaml`
+  * LIVE - `http://localhost:8081/orders/v3/api-docs`
+  * UI - `http://localhost:8081/orders/swagger-ui/index.html`
 
 ### Verification
 

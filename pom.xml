@@ -24,6 +24,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<orderengine.version>1.0.0-SNAPSHOT</orderengine.version>
 		<openapi-generator.version>7.9.0</openapi-generator.version>
+		<springdoc.version>3.1.0</springdoc.version>
 	</properties>
 
 	<dependencyManagement>
