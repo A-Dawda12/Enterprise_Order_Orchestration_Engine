@@ -199,6 +199,18 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(status);
         OrderEntity saved = orderRepository.save(order);
 
+        if(previous == status) {
+            return order;
+        }
+
+        if(!OrderStatusTransitions.isAllowed(previous, status)) {
+            throw new OrderEngineException(
+                    ErrorCode.CONFLICT,
+                    "Illegal status transition: " + previous + " -> " + status + "; allowed="
+                    + OrderStatusTransitions.allowedFrom(previous)
+            );
+        }
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("from", previous.name());
         payload.put("to", saved.getStatus().name());

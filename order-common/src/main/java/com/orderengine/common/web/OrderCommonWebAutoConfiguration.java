@@ -5,10 +5,12 @@ import com.orderengine.common.filter.CorrelationIdFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@ComponentScan(basePackageClasses = {
+//@ComponentScan(basePackageClasses = {
+@Import({
         CorrelationIdFilter.class,
         ApiAccessLogFilter.class,
         GlobalExceptionHandler.class,

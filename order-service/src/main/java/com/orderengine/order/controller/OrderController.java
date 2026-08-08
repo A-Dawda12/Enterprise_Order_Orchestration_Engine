@@ -7,6 +7,8 @@ import com.orderengine.order.api.mapper.OrderApiMapper;
 import com.orderengine.order.domain.OrderEntity;
 import com.orderengine.order.domain.OrderStatus;
 import com.orderengine.order.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/orders")
+@Tag(name = "Orders", description = "Create, get and list orders")
 public class OrderController {
 
     private  static final Logger log = LoggerFactory.getLogger(OrderController.class);
@@ -29,6 +32,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @Operation(summary = "Create order", description = "Creates a new order for a customer with the specified items and shipping address.")
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         log.info("createOrder customerId={} itemCount={}", request.customerId(), request.items().size());
         OrderEntity created = orderService.createOrder(
@@ -41,11 +45,13 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
+    @Operation(summary = "Get order by Id")
     public OrderResponse getOrder(@PathVariable String orderId) {
         return OrderApiMapper.toResponse(orderService.getOrder(orderId));
     }
 
     @GetMapping
+    @Operation(summary = "List orders", description = "Paginated list; optional status filter")
     public PageOrderResponse listOrders(
             @RequestParam(required = false)OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
