@@ -6,6 +6,7 @@ import com.orderengine.common.error.ErrorDetail;
 import com.orderengine.common.error.OrderEngineException;
 import com.orderengine.common.logging.MdcKeys;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("Unexpected error occurred", ex);
         return buildResponse(
                 ErrorCode.INTERNAL_ERROR,
                 "An unexpected error occurred",

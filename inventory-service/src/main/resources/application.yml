@@ -25,7 +25,7 @@ spring:
 
 server:
   port: 8082
-  servelt:
+  servlet:
     context-path: /inventory
 
 management:

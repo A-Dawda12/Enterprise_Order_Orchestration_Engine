@@ -21,8 +21,9 @@ public class ReservationEntity {
     @Column(name = "order_id", length = 36, nullable = false, unique = true)
     private String orderId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 32, nullable = false)
-    private ResevationStatus status;
+    private ReservationStatus status;
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
@@ -59,11 +60,11 @@ public class ReservationEntity {
         this.orderId = orderId;
     }
 
-    public ResevationStatus getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ResevationStatus status) {
+    public void setStatus(ReservationStatus status) {
         this.status = status;
     }
 
