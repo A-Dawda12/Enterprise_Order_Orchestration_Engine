@@ -6,7 +6,7 @@
     <springProfile name="local,dev">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%d{ISO8601} [%thread] %-5level ${APP_NAME} [%X{correlationId:-}] [%X{traceId:-}] %logger{36} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX, Asia/Kolkata} [%thread] %-5level ${APP_NAME} [%X{correlationId:-}] [%X{traceId:-}] %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
         <root level="INFO">
