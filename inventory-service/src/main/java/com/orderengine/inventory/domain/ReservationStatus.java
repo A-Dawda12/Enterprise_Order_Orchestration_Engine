@@ -1,6 +1,6 @@
 package com.orderengine.inventory.domain;
 
-public enum ResevationStatus {
+public enum ReservationStatus {
     RESERVED,
     CONFIRMED,
     RELEASED

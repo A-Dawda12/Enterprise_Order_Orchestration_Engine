@@ -371,12 +371,12 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.1 Inventory Service
 
-* [ ] Schema `V1__inventory.sql`
-* [ ] Seed data: `SKU-123` with quantity 150
-* [ ] `POST /v1/reservations` — pessimistic lock via Redis `inventory:lock:{sku}`
-* [ ] `DELETE /v1/reservations/{id}` — idempotent release
-* [ ] `POST /v1/reservations/{id}/confirm`
-* [ ] `GET /v1/inventory/{sku}`
+* [x] Schema `V1__inventory.sql`
+* [x] Seed data: `SKU-123` with quantity 150
+* [x] `POST /v1/reservations` — pessimistic lock via Redis `inventory:lock:{sku}`
+* [x] `DELETE /v1/reservations/{id}` — idempotent release
+* [x] `POST /v1/reservations/{id}/confirm`
+* [x] `GET /v1/inventory/{sku}`
 
 #### 4.2 Payment Service
 
