@@ -3,10 +3,29 @@ spring:
     name: inventory-service
   profiles:
     active: local
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/inventory_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
 server:
   port: 8082
-  servelt:
+  servlet:
     context-path: /inventory
 
 management:
@@ -17,3 +36,8 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+orderengine:
+  idempotency:
+    enabled: true
+    ttl: 24h
