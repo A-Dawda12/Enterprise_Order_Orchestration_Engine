@@ -389,7 +389,7 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.3 Fraud Service
 
-* [ ] Schema `V1__fraud.sql`
+* [x] Schema `V1__fraud.sql`
 * [ ] `POST /v1/assessments` — returns `score`, `requiresReview` (true if score > 80)
 * [ ] `POST /v1/assessments/{id}/decision` — `APPROVED` / `REJECTED`
 * [ ] `GET /v1/assessments/{id}`
