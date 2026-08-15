@@ -380,12 +380,12 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.2 Payment Service
 
-* [ ] Schema `V1__payments.sql`
-* [ ] `POST /v1/payments/authorize` → status `AUTHORIZED`
-* [ ] `POST /v1/payments/{id}/capture` → `CAPTURED`
-* [ ] `POST /v1/payments/{id}/refund` → `REFUNDED`
-* [ ] `POST /v1/payments/{id}/void` (for compensation — authorized-only)
-* [ ] Stub gateway bean
+* [x] Schema `V1__payments.sql`
+* [x] `POST /v1/payments/authorize` → status `AUTHORIZED`
+* [x] `POST /v1/payments/{id}/capture` → `CAPTURED`
+* [x] `POST /v1/payments/{id}/refund` → `REFUNDED`
+* [x] `POST /v1/payments/{id}/void` (for compensation — authorized-only)
+* [x] Stub gateway bean
 
 #### 4.3 Fraud Service
 

@@ -3,6 +3,10 @@ spring:
     name: order-service
   profiles:
     active: local
+  jackson2:
+    time-zone: Asia/Kolkata
+    serialization:
+      write-dates-as-timestamps: false
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/order_db
     username: ${POSTGRES_USER:postgres}

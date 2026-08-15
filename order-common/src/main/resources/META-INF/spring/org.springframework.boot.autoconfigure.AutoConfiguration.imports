@@ -1,3 +1,4 @@
 com.orderengine.common.web.OrderCommonWebAutoConfiguration
 com.orderengine.common.idempotency.IdempotencyAutoConfiguration
 com.orderengine.common.http.TracingClientAutoConfiguration
+com.orderengine.common.jackson.OrderCommonJacksonAutoConfiguration
