@@ -1,6 +1,6 @@
 spring:
   application:
-    name: notification-service
+    name: fraud-service
   profiles:
     active: local
   jackson2:
@@ -28,9 +28,9 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: 8086
+  port: 8084
   servlet:
-    context-path: /notificatiions
+    context-path: /fraud
 
 management:
   endpoints:
@@ -45,3 +45,10 @@ orderengine:
   idempotency:
     enabled: true
     ttl: 24h
+  fraud:
+    review-score-threshold: 80
+    high-value-threshold: 100.00
+    new-account-points: 45
+    high-value-points: 45
+    new-account-prefixes:
+      - "new-"
