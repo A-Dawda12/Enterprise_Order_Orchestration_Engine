@@ -1,13 +1,36 @@
 spring:
   application:
-    name: notification-service
+    name: fraud-service
   profiles:
     active: local
+  jackson2:
+    time-zone: Asia/Kolkata
+    serialization:
+      write-dates-as-timestamps: false
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/fraud_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
 server:
-  port: 8086
+  port: 8084
   servlet:
-    context-path: /notificatiions
+    context-path: /fraud
 
 management:
   endpoints:
@@ -17,3 +40,15 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+orderengine:
+  idempotency:
+    enabled: true
+    ttl: 24h
+  fraud:
+    review-score-threshold: 80
+    high-value-threshold: 100.00
+    new-account-points: 45
+    high-value-points: 45
+    new-account-prefixes:
+      - "new-"
