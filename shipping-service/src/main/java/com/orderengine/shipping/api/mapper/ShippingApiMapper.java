@@ -1,6 +1,6 @@
-package com.orderengine.shipping.mapper;
+package com.orderengine.shipping.api.mapper;
 
-import com.orderengine.shipping.api.dto.ShippingResponse;
+import com.orderengine.shipping.api.dto.ShipmentResponse;
 import com.orderengine.shipping.domain.ShipmentEntity;
 
 public final class ShippingApiMapper {
@@ -9,8 +9,8 @@ public final class ShippingApiMapper {
 
     }
 
-    public static ShippingResponse toResponse(ShipmentEntity entity) {
-        return new ShippingResponse(
+    public static ShipmentResponse toResponse(ShipmentEntity entity) {
+        return new ShipmentResponse(
                 entity.getShipmentId(),
                 entity.getOrderId(),
                 entity.getStatus().name(),

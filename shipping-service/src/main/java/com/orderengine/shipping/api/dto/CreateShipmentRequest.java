@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public record CreateShippingRequest (
+public record CreateShipmentRequest(
         @NotBlank String orderId,
         String reservationId,
         @Valid @NotNull ShippingAddressRequest shippingAddress,

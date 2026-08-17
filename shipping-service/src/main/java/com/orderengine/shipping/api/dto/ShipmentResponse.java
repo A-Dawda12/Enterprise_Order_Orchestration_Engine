@@ -2,7 +2,7 @@ package com.orderengine.shipping.api.dto;
 
 import java.time.Instant;
 
-public record ShippingResponse (
+public record ShipmentResponse(
         String shipmentId,
         String orderId,
         String status,
