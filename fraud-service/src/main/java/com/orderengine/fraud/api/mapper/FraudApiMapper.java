@@ -1,4 +1,4 @@
-package com.orderengine.fraud.mapper;
+package com.orderengine.fraud.api.mapper;
 
 import com.orderengine.fraud.api.dto.FraudAssessmentResponse;
 import com.orderengine.fraud.domain.FraudAssessmentEntity;
