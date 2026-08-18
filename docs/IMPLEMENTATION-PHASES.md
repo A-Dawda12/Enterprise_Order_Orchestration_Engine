@@ -396,7 +396,7 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.4 Shipping Service
 
-* [ ] Schema `V1__shipping.sql`
+* [x] Schema `V1__shipping.sql`
 * [ ] `POST /v1/shipments` — returns `trackingNumber`, `labelUrl`
 * [ ] `DELETE /v1/shipments/{id}` — cancel (idempotent)
 * [ ] Optional: configurable stub failure mode for retry testing (Phase 8)
