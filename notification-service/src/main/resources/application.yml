@@ -1,19 +1,53 @@
 spring:
   application:
     name: notification-service
+
   profiles:
     active: local
+
+  jackson:
+    time-zone: Asia/Kolkata
+#    serialization:
+#      write-dates-as-timestamps: false
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/notification_db
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
 server:
   port: 8086
   servlet:
-    context-path: /notification
+    context-path: /notifications
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info,prometheus,metrics
+
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: when_authorized
+
+orderengine:
+  idempotency:
+    enabled: true
+    ttl: 24h
