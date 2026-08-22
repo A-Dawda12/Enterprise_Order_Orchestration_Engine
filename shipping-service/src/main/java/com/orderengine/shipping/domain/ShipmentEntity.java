@@ -12,7 +12,7 @@ public class ShipmentEntity {
     @Column(name = "shipment_id", length = 36, nullable = false)
     private String shipmentId;
 
-    @Column(name = "ordder_id", length = 36, nullable = false)
+    @Column(name = "order_id", length = 36, nullable = false)
     private String orderId;
 
     @Column(name = "reservation_id", length = 36)
