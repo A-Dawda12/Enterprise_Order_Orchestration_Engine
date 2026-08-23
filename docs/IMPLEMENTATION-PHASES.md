@@ -403,7 +403,7 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.5 Notification Service
 
-* [ ] Schema `V1__notifications.sql`
+* [x] Schema `V1__notifications.sql`
 * [ ] `POST /v1/notifications/send` → `202 QUEUED`
 * [ ] Templates: `ORDER_SHIPPED`, `ORDER_CANCELLED`
 * [ ] `GET /v1/notifications/{id}`
