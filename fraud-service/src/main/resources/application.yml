@@ -7,6 +7,9 @@ spring:
     time-zone: Asia/Kolkata
     serialization:
       write-dates-as-timestamps: false
+  http:
+    converters:
+      preferred-json-mapper: jackson2
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5433}/fraud_db
     username: ${POSTGRES_USER:postgres}

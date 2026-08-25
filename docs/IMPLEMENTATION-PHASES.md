@@ -396,17 +396,17 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 #### 4.4 Shipping Service
 
-* [ ] Schema `V1__shipping.sql`
-* [ ] `POST /v1/shipments` — returns `trackingNumber`, `labelUrl`
-* [ ] `DELETE /v1/shipments/{id}` — cancel (idempotent)
+* [x] Schema `V1__shipping.sql`
+* [x] `POST /v1/shipments` — returns `trackingNumber`, `labelUrl`
+* [x] `DELETE /v1/shipments/{id}` — cancel (idempotent)
 * [ ] Optional: configurable stub failure mode for retry testing (Phase 8)
 
 #### 4.5 Notification Service
 
-* [ ] Schema `V1__notifications.sql`
-* [ ] `POST /v1/notifications/send` → `202 QUEUED`
-* [ ] Templates: `ORDER_SHIPPED`, `ORDER_CANCELLED`
-* [ ] `GET /v1/notifications/{id}`
+* [x] Schema `V1__notifications.sql`
+* [x] `POST /v1/notifications/send` → `202 QUEUED`
+* [x] Templates: `ORDER_SHIPPED`, `ORDER_CANCELLED`
+* [x] `GET /v1/notifications/{id}`
 
 #### 4.6 Per-service verification
 
