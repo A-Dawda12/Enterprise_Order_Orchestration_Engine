@@ -440,8 +440,8 @@ Type-safe REST clients for `order-orchestration-app` to call domain services. Ma
 
 #### 5.1 Codegen setup
 
-* [ ] Parent POM plugin config: `generatorName=spring`, `library=spring-boot`, `useSpringBoot4=true`
-* [ ] One client module per domain service
+* [x] Parent POM plugin config: `generatorName=spring`, `library=spring-boot`, `useSpringBoot4=true`
+* [x] One client module per domain service
 
 #### 5.2 Client wrappers
 
