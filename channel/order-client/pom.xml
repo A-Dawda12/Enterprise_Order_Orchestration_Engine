@@ -66,6 +66,7 @@
 							<configOptions>
 								<useSpringBoot4>true</useSpringBoot4>
 								<interfaceOnly>true</interfaceOnly>
+								<useResponseEntity>false</useResponseEntity>
 								<useTags>true</useTags>
 								<slipDefaultInterface>true</slipDefaultInterface>
 								<openApiNullable>false</openApiNullable>
