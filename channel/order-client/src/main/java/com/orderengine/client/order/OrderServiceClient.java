@@ -1,4 +1,4 @@
-﻿package com.orderengine.client.order;
+package com.orderengine.client.order;
 
 import com.orderengine.client.order.api.OrdersApi;
 import com.orderengine.client.order.model.CreateOrderRequest;

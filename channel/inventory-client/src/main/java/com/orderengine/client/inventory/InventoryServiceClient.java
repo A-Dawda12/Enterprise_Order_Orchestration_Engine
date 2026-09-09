@@ -11,23 +11,29 @@ public class InventoryServiceClient {
 
     private final InventoryApi inventoryApi;
 
-    public InventoryServiceClient(InventoryApi inventoryApi){
+    public InventoryServiceClient(InventoryApi inventoryApi) {
         this.inventoryApi = inventoryApi;
     }
 
-    public StockResponse getStock(String sku){
+    public StockResponse getStock(String sku) {
         return inventoryApi.getStock(sku);
     }
 
-    public ReservationResponse reserve(String idempotencyKey, ReserveRequest request){
+    public ReservationResponse reserve(
+            String idempotencyKey,
+            ReserveRequest request
+    ) {
         return inventoryApi.reserve(idempotencyKey, request);
     }
 
-    public void release(String reservationId){
+    public void release(String reservationId) {
         inventoryApi.release(reservationId);
     }
 
-    public ReservationResponse confirm(String reservationId, String idempotencyKey) {
+    public ReservationResponse confirm(
+            String reservationId,
+            String idempotencyKey
+    ) {
         return inventoryApi.confirm(reservationId, idempotencyKey);
     }
 }
