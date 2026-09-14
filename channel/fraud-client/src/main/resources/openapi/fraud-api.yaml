@@ -1,0 +1,180 @@
+openapi: 3.0.3
+
+info:
+  title: Fraud Service API
+  description: Fraud assessment and review decision APIs
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084/fraud
+    description: Local
+
+tags:
+  - name: Fraud
+  - name: Health
+
+paths:
+  /v1/health:
+    get:
+      tags:
+        - Health
+      summary: Health probe
+      operationId: health
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /v1/assessments:
+    post:
+      tags:
+        - Fraud
+      summary: Assess fraud
+      operationId: assess
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FraudAssessmentRequest"
+      responses:
+        "201":
+          description: Assessment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudAssessmentResponse"
+
+  /v1/assessments/{assessmentId}:
+    get:
+      tags:
+        - Fraud
+      summary: Get assessment
+      operationId: getAssessment
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assessment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudAssessmentResponse"
+        "404":
+          description: Assessment not found
+
+  /v1/assessments/{assessmentId}/decision:
+    post:
+      tags:
+        - Fraud
+      summary: Record review decision
+      operationId: recordDecision
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewDecisionRequest"
+      responses:
+        "200":
+          description: Decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FraudAssessmentResponse"
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    FraudAssessmentRequest:
+      type: object
+      required:
+        - orderId
+        - customerId
+        - amount
+        - shippingAddress
+        - paymentMethodToken
+      properties:
+        orderId:
+          type: string
+        customerId:
+          type: string
+        amount:
+          type: number
+        shippingAddress:
+          $ref: "#/components/schemas/FraudShippingAddressRequest"
+        paymentMethodToken:
+          type: string
+
+    FraudShippingAddressRequest:
+      type: object
+      required:
+        - country
+        - postalCode
+      properties:
+        country:
+          type: string
+        postalCode:
+          type: string
+
+    FraudAssessmentResponse:
+      type: object
+      properties:
+        assessmentId:
+          type: string
+        orderId:
+          type: string
+        score:
+          type: integer
+        riskLevel:
+          type: string
+        requiresReview:
+          type: boolean
+        signals:
+          type: array
+          items:
+            type: string
+        assessedAt:
+          type: string
+          format: date-time
+
+    ReviewDecisionRequest:
+      type: object
+      required:
+        - decision
+        - reviewerId
+      properties:
+        decision:
+          type: string
+          enum:
+            - APPROVED
+            - REJECTED
+        reviewerId:
+          type: string
+        notes:
+          type: string
