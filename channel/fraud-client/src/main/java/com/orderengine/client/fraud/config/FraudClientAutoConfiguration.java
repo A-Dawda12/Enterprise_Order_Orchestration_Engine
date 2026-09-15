@@ -19,7 +19,7 @@ import org.springframework.web.client.RestClient;
 public class FraudClientAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(name = "inventoryServiceRestClient")
+    @ConditionalOnMissingBean(name = "fraudServiceRestClient")
     RestClient fraudServiceRestClient(
             RestClient.Builder restClientBuilder,
             FraudClientProperties properties,

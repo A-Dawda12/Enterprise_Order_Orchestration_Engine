@@ -19,15 +19,15 @@ import org.springframework.web.client.RestClient;
 public class NotificationClientAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(name = "paymentServiceRestClient")
-    RestClient paymentServiceRestClient(
+    @ConditionalOnMissingBean(name = "notificationServiceRestClient")
+    RestClient notificationServiceRestClient(
             RestClient.Builder restClientBuilder,
             NotificationClientProperties properties,
             ObjectMapper objectMapper
     ) {
         return DomainServiceRestClients.restClient(
                 restClientBuilder,
-                "payment-service",
+                "notification-service",
                 properties.getBaseUrl(),
                 objectMapper
         );
