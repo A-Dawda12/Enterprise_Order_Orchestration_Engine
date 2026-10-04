@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orderengine.client.order.OrderServiceClient;
 import com.orderengine.client.order.api.OrdersApi;
 import com.orderengine.common.http.DomainServiceRestClients;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,12 +22,13 @@ public class OrderClientAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "orderServiceRestClient")
     RestClient orderServiceRestClient(
-            RestClient.Builder restClientBuilder,
+            ObjectProvider<RestClient.Builder> restClientBuilder,
             OrderClientProperties properties,
             ObjectMapper objectMapper
     ) {
+        RestClient.Builder builder = restClientBuilder.getIfAvailable(RestClient::builder);
         return DomainServiceRestClients.restClient(
-                restClientBuilder,
+                builder,
                 "order-service",
                 properties.getBaseUrl(),
                 objectMapper

@@ -19,21 +19,43 @@ services:
       start_period: 10s
 
   redis:
-      image: redis:7-alpine
-      container_name: enterprise_redis
-      ports:
-        - "6380:6379"
-      volumes:
-        - redis-data:/data
-      command: ["redis-server", "--appendonly", "yes"]
-      healthcheck:
-        test: ["CMD", "redis-cli", "ping"]
-        interval: 5s
-        timeout: 5s
-        retries: 10
-        start_period: 5s
+    image: redis:7-alpine
+    container_name: enterprise_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  zeebe:
+    image: camunda/zeebe:8.5.5
+    container_name: order-engine-zeebe
+    environment:
+      ZEEBE_BROKER_GATEWAY_ENABLE: "true"
+      ZEEBE_BROKER_NETWORK_HOST: "0.0.0.0"
+      ZEEBE_BROKER_NETWORK_ADVERTISEDHOST: "localhost"
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx512m"
+    ports:
+      - "26500:26500"
+      - "8080:8080"
+      - "9600:9600"
+    volumes:
+      - zeebe_data:/usr/local/zeebe/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
 volumes:
   postgres_data:
   redis-data:
+  zeebe_data:
 

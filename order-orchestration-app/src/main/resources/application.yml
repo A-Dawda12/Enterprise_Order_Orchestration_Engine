@@ -9,6 +9,14 @@ server:
   servlet:
     context-path: /orchestration
 
+zeebe:
+  client:
+    broker:
+      grpc-address: ${ZEEBE_GRPC_ADDRESS:localhost:26500}
+      rest-address: ${ZEEBE_REST_ADDRESS:http://localhost:8080}
+    security:
+      plaintext: true
+
 management:
   endpoints:
     web:

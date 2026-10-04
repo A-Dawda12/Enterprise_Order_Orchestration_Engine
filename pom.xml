@@ -25,6 +25,7 @@
 		<orderengine.version>1.0.0-SNAPSHOT</orderengine.version>
 		<openapi-generator.version>7.9.0</openapi-generator.version>
 		<springdoc.version>3.1.0</springdoc.version>
+		<camunda.version>8.5.19</camunda.version>
 	</properties>
 
 	<dependencyManagement>

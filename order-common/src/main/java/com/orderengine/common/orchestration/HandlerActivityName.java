@@ -2,7 +2,7 @@ package com.orderengine.common.orchestration;
 
 public class HandlerActivityName {
 
-    public static final String PROCESS_ORDER_FULLFILLMENT = "process_order_fullfillment";
+    public static final String PROCESS_ORDER_FULLFILLMENT = "process_order_fulfillment";
 
     //order intake and validation
     public static final String GET_ORDER_FOR_FULFILLMENT = "getOrderForFulfillment";
