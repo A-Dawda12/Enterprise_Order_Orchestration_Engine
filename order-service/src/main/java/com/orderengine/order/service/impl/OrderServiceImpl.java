@@ -2,6 +2,8 @@ package com.orderengine.order.service.impl;
 
 import com.orderengine.common.error.ErrorCode;
 import com.orderengine.common.error.OrderEngineException;
+import com.orderengine.order.client.orchestration.OrchestrationClient;
+import com.orderengine.order.client.orchestration.WorkflowInstanceResponse;
 import com.orderengine.order.domain.*;
 import com.orderengine.order.repository.InvoiceRepository;
 import com.orderengine.order.repository.OrderEventRepository;
@@ -10,7 +12,9 @@ import com.orderengine.order.service.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,16 +28,45 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderEventRepository orderEventRepository;
     private final InvoiceRepository invoiceRepository;
+    private final OrchestrationClient orchestrationClient;
+    private final TransactionTemplate transcationTemplate;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderEventRepository orderEventRepository, InvoiceRepository invoiceRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            OrderEventRepository orderEventRepository,
+                            InvoiceRepository invoiceRepository,
+                            OrchestrationClient orchestrationClient,
+                            PlatformTransactionManager transactionManager) {
         this.orderRepository = orderRepository;
         this.orderEventRepository = orderEventRepository;
         this.invoiceRepository = invoiceRepository;
+        this.orchestrationClient = orchestrationClient;
+        this.transcationTemplate = new TransactionTemplate(transactionManager);
     }
 
     @Override
-    @Transactional
     public OrderEntity createOrder(
+            String customerId,
+            List<NewOrderItem> items,
+            ShippingAddress shippingAddress,
+            String currency
+    ) {
+        OrderEntity saved = transcationTemplate.execute(status -> persistNewOrder(
+                customerId, items, shippingAddress, currency
+        ));
+
+        if(saved == null) {
+            throw new OrderEngineException(ErrorCode.INTERNAL_ERROR, "Failed to create order");
+        }
+
+        WorkflowInstanceResponse instance = orchestrationClient.startOrderFulfillment(
+                UUID.fromString(saved.getOrderId())
+        );
+
+        transcationTemplate.executeWithoutResult(status -> attachWorkflowKey(saved, instance.instanceKey()));
+        return saved;
+    }
+
+    public OrderEntity persistNewOrder (
             String customerId,
             List<NewOrderItem> items,
             ShippingAddress shippingAddress,
@@ -66,6 +99,14 @@ public class OrderServiceImpl implements OrderService {
                 "totalAmount", saved.getTotalAmount()
         ));
         return saved;
+    }
+
+    private void attachWorkflowKey(OrderEntity order, String workflowInstanceKey) {
+        order.setWorkflowKey(workflowInstanceKey);
+        orderRepository.save(order);
+        appendEvent(order.getOrderId(), "order.workflow.started", Map.of(
+                "workflowInstanceKey", workflowInstanceKey
+        ));
     }
 
     @Override
