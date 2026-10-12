@@ -56,13 +56,13 @@ flowchart LR
 
 ---
 
-## Phase 0 — Project scaffold
+# Phase 0 — Project scaffold
 
-### Objective
+## Objective
 
 Create the Maven multi-module skeleton and repository layout so all subsequent work has a consistent home.
 
-### Exit criteria
+## Exit criteria
 
 * [x] Parent POM builds with `mvn clean install -DskipTests`
 * [x] Module structure matches [IMPLEMENTATION-PATTERNS §3.1](./IMPLEMENTATION-PATTERNS.md#31-module-layout)
@@ -71,26 +71,26 @@ Create the Maven multi-module skeleton and repository layout so all subsequent w
 
 > **Workflow rule:** Complete **one numbered step at a time**. Verify before moving on. Do not batch entire phases in a single change.
 
-### Steps (one micro-step per change — stop and verify after each)
+## Steps
 
-#### 0.1 Root parent POM only
+### 0.1 Root parent POM only
 
 * [x] **0.1.1** Create root `pom.xml` with `packaging=pom`, Java 21, Spring Boot **4.1.0** parent — **no modules yet**
 * [x] **0.1.2** Verify: `mvn -f pom.xml validate` → SUCCESS
 
-#### 0.2 Add `order-common` module only
+### 0.2 Add `order-common` module only
 
 * [x] **0.2.1** Add `<module>order-common</module>` to root POM
 * [x] **0.2.2** Create `order-common/pom.xml` (jar, depends on `spring-boot-starter` only)
 * [x] **0.2.3** Create `OrderEngineConstants.java` placeholder
 * [x] **0.2.4** Verify: `mvn clean install -DskipTests` → SUCCESS (2 modules)
 
-#### 0.3 Add `.gitignore`
+### 0.3 Add `.gitignore`
 
 * [x] **0.3.1** Create root `.gitignore` (`target/`, `.env`, IDE files)
 * [x] **0.3.2** Verify: file exists, no build impact
 
-#### 0.4 Add `order-service` only (template for others)
+### 0.4 Add `order-service` only (template for others)
 
 * [x] **0.4.1** Add `<module>order-service</module>` to root POM
 * [x] **0.4.2** Create `order-service/pom.xml` (web + actuator + order-common)
@@ -100,7 +100,7 @@ Create the Maven multi-module skeleton and repository layout so all subsequent w
 * [x] **0.4.6** Create `HealthProbeController` in `controller/` package → `GET /v1/health`
 * [x] **0.4.7** Verify: `mvn clean install -DskipTests` then `mvn spring-boot:run -pl order-service` → curl health OK
 
-#### 0.5 Repeat 0.4 for each remaining domain service (one service per session)
+### 0.5 Repeat 0.4 for each remaining domain service (one service per session)
 
 * [x] **0.5.1** `inventory-service` (8082, `/inventory`) — verify alone
 * [x] **0.5.2** `payment-service` (8083, `/payments`) — verify alone
@@ -108,17 +108,17 @@ Create the Maven multi-module skeleton and repository layout so all subsequent w
 * [x] **0.5.4** `shipping-service` (8085, `/shipping`) — verify alone
 * [x] **0.5.5** `notification-service` (8086, `/notifications`) — verify alone
 
-#### 0.6 Add `order-orchestration-app` only
+### 0.6 Add `order-orchestration-app` only
 
 * [x] **0.6.1** Add module to root POM
 * [x] **0.6.2** Create pom + Application + yml (8090, `/orchestration`) + health — verify alone
 
-#### 0.7 Add `channel` aggregator + one client (`order-client`)
+### 0.7 Add `channel` aggregator + one client (`order-client`)
 
 * [x] **0.7.1** Create `channel/pom.xml` aggregator, add `<module>channel</module>` to root
 * [x] **0.7.2** Create `channel/order-client` stub — verify build
 
-#### 0.8 Add remaining channel clients (one at a time)
+### 0.8 Add remaining channel clients (one at a time)
 
 * [x] **0.8.1** `inventory-client`
 * [x] **0.8.2** `payment-client`
@@ -127,7 +127,7 @@ Create the Maven multi-module skeleton and repository layout so all subsequent w
 * [x] **0.8.5** `notification-client`
 * [x] **0.8.6** Verify: full `mvn clean install -DskipTests`
 
-#### 0.9 Deploy folder stubs (one file at a time)
+### 0.9 Deploy folder stubs (one file at a time)
 
 * [x] **0.9.1** `deploy/docker-compose.yml` (empty stub)
 * [x] **0.9.2** `deploy/README.md` (planned ports)
@@ -135,26 +135,27 @@ Create the Maven multi-module skeleton and repository layout so all subsequent w
 * [x] **0.9.4** `deploy/prometheus/prometheus.yml` stub
 * [x] **0.9.5** `deploy/grafana/dashboards/` directory
 
-#### 0.10 Root README
+### 0.10 Root README
 
 * [x] **0.10.1** Create `README.md` linking to docs — Phase 0 complete
 
-### Verification (full phase — only after 0.10)
+## Verification
 
 ```bash
 mvn clean install -DskipTests
+
 # Expected: BUILD SUCCESS for all modules
 ```
 
 ---
 
-## Phase 1 — Local infrastructure (Docker Compose)
+# Phase 1 — Local infrastructure (Docker Compose)
 
-### Objective
+## Objective
 
 All external dependencies run locally with one command. Camunda 8 (Zeebe + Operate + Tasklist) is reachable.
 
-### Exit criteria
+## Exit criteria
 
 * [ ] `docker compose up -d` starts all infra without errors
 * [ ] Zeebe gateway reachable at `localhost:26500`
@@ -164,25 +165,31 @@ All external dependencies run locally with one command. Camunda 8 (Zeebe + Opera
 * [ ] Redis, Kafka, Prometheus, Grafana running
 * [ ] Health documented in `deploy/README.md`
 
-### Steps
+## Steps
 
-#### 1.1 PostgreSQL
+### 1.1 PostgreSQL
 
 * [x] Single Postgres container with init scripts:
 
-  * `order_db`, `inventory_db`, `payment_db`, `fraud_db`, `shipping_db`, `notification_db`
+  * `order_db`
+  * `inventory_db`
+  * `payment_db`
+  * `fraud_db`
+  * `shipping_db`
+  * `notification_db`
+
 * [x] Flyway/Liquibase placeholder per service (enabled in Phase 3+)
 
-#### 1.2 Redis
+### 1.2 Redis
 
-* [x] Redis 7 on `localhost:6379`
+* [x] Redis 7 on `localhost:6380` (host) → `6379` (container; avoids local Redis clash)
 
-#### 1.3 Kafka
+### 1.3 Kafka
 
 * [ ] Kafka (KRaft or Zookeeper) on `localhost:9092`
 * [ ] Pre-create topics from [LLD §6.1](./LLD.md#61-topic-configuration) (or auto-create enabled)
 
-#### 1.4 Camunda 8
+### 1.4 Camunda 8
 
 * [ ] Use official Camunda 8 Docker Compose (or slim self-managed stack):
 
@@ -190,41 +197,48 @@ All external dependencies run locally with one command. Camunda 8 (Zeebe + Opera
   * Operate
   * Tasklist
   * Elasticsearch (if required by stack)
+
 * [ ] Document ports in `deploy/README.md`
+
 * [ ] Verify `zbctl status` or Operate shows healthy cluster
 
-#### 1.5 Observability (infra only)
+### 1.5 Observability (infra only)
 
 * [ ] Prometheus scraping config stub
 * [ ] Grafana with Prometheus datasource provisioned
 
-#### 1.6 Docker Compose for apps (stub)
+### 1.6 Docker Compose for apps (stub)
 
 * [ ] Commented-out service blocks for Spring Boot apps (enabled as each phase completes)
 
-### Verification
+## Verification
 
 ```bash
 cd deploy && docker compose up -d
+
 # Zeebe
 zbctl status --address localhost:26500
+
 # Postgres
 psql -h localhost -U postgres -l
+
 # Redis
-redis-cli ping   # → PONG
+redis-cli ping
+# → PONG
+
 # Kafka
 kafka-topics.sh --list --bootstrap-server localhost:9092
 ```
 
 ---
 
-## Phase 2 — Shared libraries & conventions
+# Phase 2 — Shared libraries & conventions
 
-### Objective
+## Objective
 
 Cross-cutting concerns live in `order-common` and are reused by every service. Logging and API conventions are consistent from day one.
 
-### Exit criteria
+## Exit criteria
 
 * [x] `order-common` published to local Maven repo
 * [x] Standard error response matches [LLD §2.2](./LLD.md#22-standard-error-response)
@@ -233,48 +247,48 @@ Cross-cutting concerns live in `order-common` and are reused by every service. L
 * [x] `logback-spring.xml` template copied to every module
 * [x] `HandlerActivityName` and `ActivityParameters` constants in `order-common` (or orchestration module)
 
-### Steps
+## Steps
 
-#### 2.1 order-common — errors & DTOs
+### 2.1 order-common — errors & DTOs
 
 * [x] `ApiErrorResponse`, `ErrorCode` enum
 * [x] `CorrelationIdFilter` — reads/generates `X-Correlation-Id`, sets MDC
 * [x] `ApiAccessLogFilter` — method, path, status, durationMs, orderId (if present)
 
-#### 2.2 order-common — idempotency
+### 2.2 order-common — idempotency
 
 * [x] `IdempotencyFilter` — `Idempotency-Key` header, Redis `SET NX` with TTL 24h
 * [x] `IdempotencyConfig` — Redis connection from env
 
-#### 2.3 Logging template
+### 2.3 Logging template
 
 * [x] Create canonical `logback-spring.xml` per [LLD §12](./LLD.md#12-logging-configuration-logback-springxml)
 * [x] Copy to each service; set `APP_NAME` / logger package per service
 
-#### 2.4 Orchestration constants
+### 2.4 Orchestration constants
 
 * [x] `HandlerActivityName.java` — all activity names from [IMPLEMENTATION-PATTERNS §4](./IMPLEMENTATION-PATTERNS.md#4-granular-activity-catalog)
 * [x] `ActivityParameters.java` — process variable keys from [IMPLEMENTATION-PATTERNS §5](./IMPLEMENTATION-PATTERNS.md#5-process-variables-activityparameters)
 
-#### 2.5 Trace propagation stub
+### 2.5 Trace propagation stub
 
 * [x] Add `micrometer-tracing` dependency to parent POM
 * [x] `traceparent` propagation in `RestClient`/`WebClient` builder utility
 
-### Verification
+## Verification
 
 * [x] Small `@SpringBootTest` in `order-common` proves filters set MDC correctly
 * [ ] Sample log line contains `correlationId`, `service`, `httpPath`
 
 ---
 
-## Phase 3 — Order Service
+# Phase 3 — Order Service
 
-### Objective
+## Objective
 
 First domain microservice is production-shaped: REST APIs, DB schema, idempotency, logging, OpenAPI.
 
-### Exit criteria
+## Exit criteria
 
 * [ ] All Order Service **input APIs** from [LLD §3.1](./LLD.md#31-order-service) implemented
 * [ ] PostgreSQL schema from [LLD §5.1](./LLD.md#51-order-service--order_db) applied
@@ -284,77 +298,144 @@ First domain microservice is production-shaped: REST APIs, DB schema, idempotenc
 * [ ] Actuator health + prometheus at `/orders/actuator/prometheus`
 * [ ] Postman/curl smoke test documented
 
-### Steps
+## Steps
 
-#### 3.1 Persistence
+### 3.1 Persistence
 
 * [x] Flyway migration `V1__create_orders.sql` per LLD §5.1
-* [x] JPA entities: `Order`, `OrderItem`, `OrderEvent`, `Invoice`
+* [x] JPA entities:
+
+  * `Order`
+  * `OrderItem`
+  * `OrderEvent`
+  * `Invoice`
 * [x] Repositories + `OrderService` / `OrderServiceImpl`
 
-#### 3.2 REST controllers
+### 3.2 REST controllers
 
-* [x] `OrderController` — `POST /v1/orders`, `GET /v1/orders/{id}`, `GET /v1/orders`
-* [x] `OrderValidationController` — `POST /v1/orders/{id}/validate`
-* [x] `OrderInvoiceController` — `POST /v1/orders/{id}/invoice`
-* [x] `OrderStatusController` — `PATCH /v1/orders/{id}/status`
+* [x] `OrderController`
 
-#### 3.3 Business rules
+  * `POST /v1/orders`
+  * `GET /v1/orders/{id}`
+  * `GET /v1/orders`
+
+* [x] `OrderValidationController`
+
+  * `POST /v1/orders/{id}/validate`
+
+* [x] `OrderInvoiceController`
+
+  * `POST /v1/orders/{id}/invoice`
+
+* [x] `OrderStatusController`
+
+  * `PATCH /v1/orders/{id}/status`
+
+### 3.3 Business rules
 
 * [x] Validation: non-empty items, positive quantity, valid address fields
 
   * Create: Bean Validation on `CreateOrderRequest`
   * Workflow: `POST .../validate` via `OrderService.validateOrder`
+
 * [x] Status transitions enforced (state machine from [LLD §2.3](./LLD.md#23-order-status-state-machine))
 
-  * `OrderStatusTransitions` + `updateStatus` rejects illegal moves with `409 CONFLICT`
+  * `OrderStatusTransitions` + `updateStatus`
+  * Rejects illegal moves with `409 CONFLICT`
+
 * [x] `order_events` append-only audit on every status change
 
-  * `order.created`, `order.status.changed`, `order.invoice.generated`
+  * `order.created`
+  * `order.status.changed`
+  * `order.invoice.generated`
 
-#### 3.4 Cross-cutting
+### 3.4 Cross-cutting
 
-* [x] Wire `order-common` `GlobalExceptionHandler` — scan `com.orderengine.common.web` + auto-config `@Import` (not nested `@ComponentScan`)
-* [ ] **Enable idempotency** — set `orderengine.idempotency.enabled=true` (Redis required); enforce `Idempotency-Key` on POST/PUT/PATCH in `IdempotencyFilter`
-* [ ] `logback-spring.xml` for `order-service`
-* [ ] `application.yml`: port `8081`, context-path `/orders`, Postgres URL
+* [x] Wire `order-common` `GlobalExceptionHandler`
 
-  * Note: idempotency is currently `enabled: false` for Phase 3.2–3.3 local/Postman use
-  * Note: illegal status transitions must return `409 CONFLICT` via `GlobalExceptionHandler`
+  * Scan `com.orderengine.common.web`
+  * Auto-config `@Import`
+  * Not nested `@ComponentScan`
 
-#### 3.5 OpenAPI
+* [x] **Enable idempotency**
 
-* [x] SpringDoc dependency; annotate controllers
-* [x] Export spec to `order-service/src/main/resources/openapi/order-api.yaml`
-  * LIVE - `http://localhost:8081/orders/v3/api-docs`
-  * UI - `http://localhost:8081/orders/swagger-ui/index.html`
+  * `orderengine.idempotency.enabled=true`
+  * Redis
+  * Require `Idempotency-Key` on POST/PUT/PATCH
 
-### Verification
+* [x] `logback-spring.xml` for `order-service`
+
+* [x] `application.yml`
+
+  * Port `8081`
+  * Context-path `/orders`
+  * Postgres + Redis URLs
+
+* [x] Illegal status transitions return `409 CONFLICT`
+
+* [x] Mutating APIs without `Idempotency-Key` return `400 BAD_REQUEST`
+
+### 3.5 OpenAPI
+
+* [x] SpringDoc dependency (`springdoc-openapi-starter-webmvc-ui` 3.1.0)
+* [x] Annotate controllers
+* [x] Export spec to:
+  `order-service/src/main/resources/openapi/order-api.yaml`
+
+Live:
+
+`http://localhost:8081/orders/v3/api-docs`
+
+UI:
+
+`http://localhost:8081/orders/swagger-ui/index.html`
+
+## Verification
 
 ```bash
 # Create order
+
 curl -X POST http://localhost:8081/orders/v1/orders \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: $(uuidgen)" \
-  -d '{"customerId":"cust-001","items":[{"sku":"SKU-123","quantity":2,"unitPrice":29.99}],"shippingAddress":{"line1":"123 Main St","city":"Seattle","state":"WA","postalCode":"98101","country":"US"},"currency":"USD"}'
+  -d '{
+    "customerId":"cust-001",
+    "items":[
+      {
+        "sku":"SKU-123",
+        "quantity":2,
+        "unitPrice":29.99
+      }
+    ],
+    "shippingAddress":{
+      "line1":"123 Main St",
+      "city":"Seattle",
+      "state":"WA",
+      "postalCode":"98101",
+      "country":"US"
+    },
+    "currency":"INR"
+  }'
 
 # Get order → status CREATED
+
 # Validate → valid=true
+
 # Patch status → VALIDATED
 ```
 
 ---
 
-## Phase 4 — Domain microservices
+# Phase 4 — Domain microservices
 
-### Objective
+## Objective
 
 Remaining five services implemented with the same patterns as Order Service. Each is independently testable.
 
-### Exit criteria
+## Exit criteria
 
 | Service      | Port | LLD section | Schema | Core APIs working                |
-| ------------ | ---- | ----------- | ------ | -------------------------------- |
+| ------------ | ---: | ----------- | ------ | -------------------------------- |
 | Inventory    | 8082 | §3.2, §5.2  | Yes    | reserve, release, confirm, stock |
 | Payment      | 8083 | §3.3, §5.3  | Yes    | authorize, capture, refund, void |
 | Fraud        | 8084 | §3.4, §5.4  | Yes    | assess, decision, get            |
@@ -367,9 +448,9 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 * [ ] Notification uses **stub** email provider (log-only acceptable)
 * [ ] Fraud scoring: configurable rule (e.g. new account + high value → score > 80)
 
-### Steps
+## Steps
 
-#### 4.1 Inventory Service
+### 4.1 Inventory Service
 
 * [x] Schema `V1__inventory.sql`
 * [x] Seed data: `SKU-123` with quantity 150
@@ -378,7 +459,7 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 * [x] `POST /v1/reservations/{id}/confirm`
 * [x] `GET /v1/inventory/{sku}`
 
-#### 4.2 Payment Service
+### 4.2 Payment Service
 
 * [x] Schema `V1__payments.sql`
 * [x] `POST /v1/payments/authorize` → status `AUTHORIZED`
@@ -387,32 +468,35 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 * [x] `POST /v1/payments/{id}/void` (for compensation — authorized-only)
 * [x] Stub gateway bean
 
-#### 4.3 Fraud Service
+### 4.3 Fraud Service
 
 * [x] Schema `V1__fraud.sql`
 * [x] `POST /v1/assessments` — returns `score`, `requiresReview` (true if score > 80)
 * [x] `POST /v1/assessments/{id}/decision` — `APPROVED` / `REJECTED`
 * [x] `GET /v1/assessments/{id}`
 
-#### 4.4 Shipping Service
+### 4.4 Shipping Service
 
 * [x] Schema `V1__shipping.sql`
 * [x] `POST /v1/shipments` — returns `trackingNumber`, `labelUrl`
 * [x] `DELETE /v1/shipments/{id}` — cancel (idempotent)
 * [ ] Optional: configurable stub failure mode for retry testing (Phase 8)
 
-#### 4.5 Notification Service
+### 4.5 Notification Service
 
 * [x] Schema `V1__notifications.sql`
 * [x] `POST /v1/notifications/send` → `202 QUEUED`
-* [x] Templates: `ORDER_SHIPPED`, `ORDER_CANCELLED`
+* [x] Templates:
+
+  * `ORDER_SHIPPED`
+  * `ORDER_CANCELLED`
 * [x] `GET /v1/notifications/{id}`
 
-#### 4.6 Per-service verification
+### 4.6 Per-service verification
 
 * [ ] Curl smoke test per service documented in `docs/verification/phase-4-smoke-tests.md`
 
-### Verification
+## Verification
 
 * [ ] Reserve inventory for a test orderId → `201`
 * [ ] Authorize + capture payment → statuses correct
@@ -422,13 +506,13 @@ Remaining five services implemented with the same patterns as Order Service. Eac
 
 ---
 
-## Phase 5 — Channel clients (OpenAPI)
+# Phase 5 — Channel clients (OpenAPI)
 
-### Objective
+## Objective
 
 Type-safe REST clients for `order-orchestration-app` to call domain services. Matches std-services `channel/*-client` pattern.
 
-### Exit criteria
+## Exit criteria
 
 * [ ] OpenAPI spec per domain service exported and committed under `channel/*/src/main/resources/openapi/`
 * [ ] `openapi-generator-maven-plugin` generates `*Api` interfaces
@@ -436,127 +520,271 @@ Type-safe REST clients for `order-orchestration-app` to call domain services. Ma
 * [ ] `@ConfigurationProperties` config beans with `base-url` per [LLD §14](./LLD.md#14-configuration-properties)
 * [ ] `mvn clean install` generates and compiles all clients
 
-### Steps
+## Steps
 
-#### 5.1 Codegen setup
+Do **one client at a time**:
 
-* [ ] Parent POM plugin config: `generatorName=spring`, `library=spring-boot`, `useSpringBoot4=true`
-* [ ] One client module per domain service
+> order → inventory → payment → fraud → shipping → notification
 
-#### 5.2 Client wrappers
+### 5.1 Codegen setup
 
-* [ ] `OrderServiceClient`, `InventoryServiceClient`, `PaymentServiceClient`, etc.
-* [ ] Each wraps generated API; throws `DomainServiceException` on 4xx/5xx
-* [ ] Propagate `X-Correlation-Id` and `traceparent` on every call
+* [x] Parent POM plugin config:
 
-#### 5.3 Local config defaults
+  * `generatorName=spring`
+  * `spring-http-interface` for Boot 4 `RestClient`
+
+* [x] One client module per domain service
+
+* [x] `order-api.yaml`
+
+* [x] `inventory-api.yaml`
+
+* [x] `payment-api.yaml`
+
+* [x] Remaining specs:
+
+  * fraud
+  * shipping
+  * notification
+
+### 5.2 Client wrappers
+
+Shared:
+
+* [x] `DomainServiceException` + `DomainServiceRestClients` (4xx/5xx)
+* [x] Propagate `X-Correlation-Id` and `traceparent` on every call
+
+Per client:
+
+* [x] `OrderServiceClient`
+
+  * properties
+  * auto-config
+  * `useResponseEntity=false`
+
+* [x] `InventoryServiceClient`
+
+  * properties
+  * auto-config
+  * `useResponseEntity=false`
+
+* [x] `PaymentServiceClient`
+
+  * properties
+  * auto-config
+  * `useResponseEntity=false`
+
+* [x] `FraudServiceClient`
+
+* [x] `ShippingServiceClient`
+
+* [x] `NotificationServiceClient`
+
+### 5.3 Local config defaults
 
 ```yaml
 com.orderengine.client.order.base-url: http://localhost:8081/orders
-# ... inventory, payment, fraud, shipping, notification
+com.orderengine.client.inventory.base-url: http://localhost:8082/inventory
+com.orderengine.client.payment.base-url: http://localhost:8083/payments
+
+# ... fraud, shipping, notification — add with each client
 ```
 
-### Verification
+* [x] Order `base-url` default in `OrderClientProperties`
+* [x] Inventory `base-url` default in `InventoryClientProperties`
+* [x] Payment `base-url` default in `PaymentClientProperties`
+* [x] Remaining clients
 
-* [ ] Integration test: client calls running Order Service → `200`
-* [ ] Generated code compiles without manual edits
+## Verification
+
+* [ ] `mvn -pl channel/order-client -am clean compile`
+
+  * generated `OrdersApi` returns DTOs, not `ResponseEntity`
+
+* [ ] `mvn -pl channel/inventory-client -am clean compile`
+
+  * generated `InventoryApi` returns DTOs, not `ResponseEntity`
+
+* [ ] `mvn -pl channel/payment-client -am clean compile`
+
+  * generated `PaymentsApi` returns DTOs, not `ResponseEntity`
+
+* [ ] Integration test: client calls running service → `200`
+
+* [ ] Repeat per remaining client after each is implemented
 
 ---
 
-## Phase 6 — Orchestration app core
+# Phase 6 — Orchestration app core
 
-### Objective
+## Objective
 
 `order-orchestration-app` connects to Zeebe and runs job workers using the std-services layering adapted for Camunda 8.
 
-### Exit criteria
+## Exit criteria
 
 * [ ] Zeebe client connected (`zeebe.client.broker.gateway-address`)
-* [ ] `AbstractJobWorker` base class (equivalent to `AbstractActivityProcessor`)
-* [ ] Job logging: `JOB IN` / `JOB OUT` with `activity`, `orderId`, `durationMs`
+* [ ] `AbstractJobWorker` base class
+* [ ] Job logging:
+
+  * `JOB IN`
+  * `JOB OUT`
+  * `activity`
+  * `orderId`
+  * `durationMs`
 * [ ] `POST /v1/processes/order-fulfillment/start` starts process instance
 * [ ] `GET /v1/instances/{key}` returns instance status
-* [ ] BPMN `process_order_fulfillment.bpmn` deployed (skeleton: start → end)
-* [ ] One sample worker `GetOrderForFulfillment` end-to-end
+* [ ] BPMN `process_order_fulfillment.bpmn` deployed
+* [ ] One sample worker `GetOrderForFulfillment`
 * [ ] Order Service updated: `POST /v1/orders` triggers workflow start
 
-### Steps
+## Steps
 
-#### 6.1 Zeebe / Spring integration
+### 6.1 Zeebe / Spring integration
 
 * [ ] Add `spring-boot-starter-camunda` (Camunda 8 Spring SDK) or `zeebe-client-spring`
-* [ ] `application.yml`: gateway address, job timeouts, poll interval
-* [ ] `ZeebeDeploymentConfig` — deploy BPMN from `classpath:bpmn/` on startup
+* [ ] `application.yml`
 
-#### 6.2 Abstract worker pattern
+  * gateway address
+  * job timeouts
+  * poll interval
+* [ ] `ZeebeDeploymentConfig`
 
-* [ ] `AbstractJobWorker` — read variables, execute logic, complete/fail job
-* [ ] `JobWorkerLogger` — MDC setup from `ActivatedJob` (processInstanceKey, orderId)
-* [ ] `JobWorkerExceptionHandler` — map exceptions to `fail()` vs `throwError()` (BPMN error)
+  * deploy BPMN from `classpath:bpmn/` on startup
 
-#### 6.3 Process start API
+### 6.2 Abstract worker pattern
 
-* [ ] `WorkflowController` — start process with variables: `orderId`, `customerId`, `totalAmount`, etc.
+* [ ] `AbstractJobWorker`
+
+  * read variables
+  * execute logic
+  * complete/fail job
+
+* [ ] `JobWorkerLogger`
+
+  * MDC setup from `ActivatedJob`
+  * processInstanceKey
+  * orderId
+
+* [ ] `JobWorkerExceptionHandler`
+
+  * map exceptions to `fail()` vs `throwError()` (BPMN error)
+
+### 6.3 Process start API
+
+* [ ] `WorkflowController`
+
+  * start process with variables:
+
+    * `orderId`
+    * `customerId`
+    * `totalAmount`
+    * etc.
+
 * [ ] `OrderService` calls orchestration app after order creation
+
 * [ ] Store `workflowInstanceKey` on order record
 
-#### 6.4 First worker
+### 6.4 First worker
 
-* [ ] `GetOrderForFulfillmentWorker` — `@JobWorker(type = "GetOrderForFulfillment")`
-* [ ] Calls `OrderServiceClient.getOrder(orderId)`
-* [ ] Completes job with `order` variable (thin JSON or orderId only — prefer thin)
+* [ ] `GetOrderForFulfillmentWorker`
 
-#### 6.5 Skeleton BPMN
+  * `@JobWorker(type = "GetOrderForFulfillment")`
+  * Calls `OrderServiceClient.getOrder(orderId)`
+  * Completes job with `order` variable
+  * Prefer thin variable: `orderId` only
 
-* [ ] `deploy/bpmn/process_order_fulfillment-1.0.bpmn`:
+### 6.5 Skeleton BPMN
 
-  * Start → `GetOrderForFulfillment` (serviceTask) → End
+* [ ] `deploy/bpmn/process_order_fulfillment-1.0.bpmn`
+
+  * Start
+  * `GetOrderForFulfillment`
+  * End
+
 * [ ] `zeebe:taskDefinition type="GetOrderForFulfillment"`
 
-### Verification
+## Verification
 
 ```bash
 # Create order → workflow starts
+
 curl -X POST http://localhost:8081/orders/v1/orders ...
-# Check Operate → process instance ACTIVE → COMPLETED
-# Logs show JOB IN/OUT for GetOrderForFulfillment
+
+# Check Operate
+# Process instance ACTIVE → COMPLETED
+
+# Logs should show:
+# JOB IN
+# JOB OUT
+# GetOrderForFulfillment
 ```
 
 ---
 
-## Phase 7 — Happy-path BPMN + workers
+# Phase 7 — Happy-path BPMN + workers
 
-### Objective
+## Objective
 
-Full successful order flow without fraud review, failures, or compensation. Implements validation → parallel fork → capture → ship → notify → invoice → complete.
+Full successful order flow without fraud review, failures, or compensation.
 
-### Exit criteria (maps to HLD G1, G3)
+Flow:
 
-* [ ] All workers for §4.1–§4.5 in [IMPLEMENTATION-PATTERNS](./IMPLEMENTATION-PATTERNS.md) implemented (except fraud review branch — always low score in test)
-* [ ] BPMN includes: validation gateway, parallel gateway (inventory + payment + fraud), join, capture, ship, notify, invoice, complete
-* [ ] End-to-end: `POST /orders` → order status `COMPLETED` within test profile
+**Validation → Parallel Inventory + Payment + Fraud → Capture → Ship → Notify → Invoice → Complete**
+
+## Exit criteria
+
+* [ ] All workers for §4.1–§4.5 in [IMPLEMENTATION-PATTERNS](./IMPLEMENTATION-PATTERNS.md) implemented
+
+* [ ] BPMN includes:
+
+  * validation gateway
+  * parallel gateway
+  * inventory
+  * payment
+  * fraud
+  * join
+  * capture
+  * ship
+  * notify
+  * invoice
+  * complete
+
+* [ ] End-to-end:
+  `POST /orders` → order status `COMPLETED`
+
 * [ ] Operate screenshot-worthy BPMN diagram saved to `docs/images/`
 
-### Steps
+## Steps
 
-#### 7.1 Validation workers (§4.1)
+### 7.1 Validation workers
 
 * [ ] `ValidateOrderItemsWorker`
 * [ ] `ValidateShippingAddressWorker`
 * [ ] `UpdateOrderStatusToValidatedWorker`
-* [ ] `UpdateOrderStatusToRejectedWorker` (dead-end path to cancelled end event)
-* [ ] BPMN: `Gateway_ValidationResult` on `validItems && validAddress`
+* [ ] `UpdateOrderStatusToRejectedWorker`
+* [ ] BPMN `Gateway_ValidationResult`
 
-#### 7.2 Build / transform workers (local only — no HTTP)
+  * `validItems && validAddress`
+
+### 7.2 Build / transform workers
+
+Local only — no HTTP:
 
 * [ ] `BuildReserveInventoryRequestWorker`
 * [ ] `BuildAuthorizePaymentRequestWorker`
 * [ ] `BuildFraudAssessmentRequestWorker`
 * [ ] `BuildCreateShipmentRequestWorker`
 * [ ] `BuildOrderShippedNotificationRequestWorker`
-* [ ] Extract workers: `ExtractReservationId`, `ExtractPaymentId`, `ExtractFraudScore`, `ExtractShipmentId`
 
-#### 7.3 Domain call workers (§4.2–§4.5)
+Extract workers:
+
+* [ ] `ExtractReservationId`
+* [ ] `ExtractPaymentId`
+* [ ] `ExtractFraudScore`
+* [ ] `ExtractShipmentId`
+
+### 7.3 Domain call workers
 
 * [ ] `ReserveInventoryInInventoryServiceWorker`
 * [ ] `AuthorizePaymentInPaymentServiceWorker`
@@ -569,254 +797,401 @@ Full successful order flow without fraud review, failures, or compensation. Impl
 * [ ] `GenerateInvoiceInOrderServiceWorker`
 * [ ] `UpdateOrderStatusToCompletedWorker`
 
-#### 7.4 BPMN modeling
+### 7.4 BPMN modeling
 
-* [ ] Model in Camunda Modeler — one `serviceTask` per worker
-* [ ] Each task: `zeebe:taskDefinition type="<WorkerName>"` + `zeebe:ioMapping`
-* [ ] Parallel gateway fork + join for inventory / payment / fraud branches
-* [ ] Deploy updated BPMN; version bump in filename `process_order_fulfillment-1.1.bpmn`
+* [ ] Model in Camunda Modeler
 
-#### 7.5 Service layer per worker
+* [ ] One `serviceTask` per worker
 
-* [ ] Each worker delegates to `*Service` → `*Client` (std-services layering)
-* [ ] No business logic hidden in workers — only variable mapping + service call
+* [ ] Each task:
 
-### Verification
+  * `zeebe:taskDefinition type="<WorkerName>"`
+  * `zeebe:ioMapping`
 
-| Step                                   | Check                                                   |
-| -------------------------------------- | ------------------------------------------------------- |
-| Create order (low fraud risk customer) | `COMPLETED`                                             |
-| Inventory                              | `reservation` status `CONFIRMED` or released after flow |
-| Payment                                | `CAPTURED`                                              |
-| Shipment                               | `trackingNumber` present                                |
-| Notification                           | `SENT` or `QUEUED`                                      |
-| Invoice                                | `invoiceId` on order                                    |
-| Operate                                | Full path green for one instance                        |
+* [ ] Parallel gateway fork + join
+
+* [ ] Deploy updated BPMN
+
+* [ ] Version bump:
+  `process_order_fulfillment-1.1.bpmn`
+
+### 7.5 Service layer per worker
+
+* [ ] Each worker delegates to:
+
+```text
+Worker
+  ↓
+Service
+  ↓
+Client
+  ↓
+Domain Service
+```
+
+* [ ] No business logic hidden in workers
+* [ ] Workers only handle variable mapping + service calls
+
+## Verification
+
+| Step         | Check                                          |
+| ------------ | ---------------------------------------------- |
+| Create order | `COMPLETED`                                    |
+| Inventory    | Reservation `CONFIRMED` or released after flow |
+| Payment      | `CAPTURED`                                     |
+| Shipment     | `trackingNumber` present                       |
+| Notification | `SENT` or `QUEUED`                             |
+| Invoice      | `invoiceId` on order                           |
+| Operate      | Full path green                                |
 
 ---
 
-## Phase 8 — Advanced BPMN features
+# Phase 8 — Advanced BPMN features
 
-### Objective
+## Objective
 
-Human task, payment timer, and shipping retry. Maps to HLD G4, G5, G6.
+Human task, payment timer, and shipping retry.
 
-### Exit criteria
+Maps to HLD G4, G5, G6.
+
+## Exit criteria
 
 * [ ] **G4** Fraud score > 80 → workflow pauses → Tasklist task → approve → continues
-* [ ] **G5** Payment not captured within 15 min → auto-cancel path triggered
-* [ ] **G6** Shipping fails 2× then succeeds on 3rd retry (or fail after 3 → compensation in Phase 9)
-* [ ] Fraud reject path → routes to compensation entry (Phase 9 gateway stub OK)
+* [ ] **G5** Payment not captured within 15 min → auto-cancel path
+* [ ] **G6** Shipping fails 2× then succeeds on 3rd retry
+* [ ] Fraud reject path → compensation entry
 
-### Steps
+## Steps
 
-#### 8.1 Fraud human task (§4.3)
+### 8.1 Fraud human task
 
-* [ ] BPMN `userTask` `FraudManagerReview` — candidate group `fraud-managers`
+* [ ] BPMN `userTask` `FraudManagerReview`
+* [ ] Candidate group: `fraud-managers`
 * [ ] `UpdateOrderStatusToFraudReviewWorker`
-* [ ] `RecordFraudReviewDecisionWorker` — reads `fraudDecision` from task completion
-* [ ] `Gateway_FraudReviewRequired` — `${requiresFraudReview == true}`
-* [ ] `Gateway_FraudApproved` — `${fraudDecision == "APPROVED"}`
-* [ ] Configure Tasklist connection; document login/group setup in `deploy/README.md`
+* [ ] `RecordFraudReviewDecisionWorker`
+* [ ] `Gateway_FraudReviewRequired`
+* [ ] `Gateway_FraudApproved`
+* [ ] Configure Tasklist connection
+* [ ] Document login/group setup in `deploy/README.md`
 
-#### 8.2 Payment timeout timer (§4.6)
+### 8.2 Payment timeout timer
 
-* [ ] Boundary timer `PT15M` on `AuthorizePaymentInPaymentService` task
+* [ ] Boundary timer `PT15M` on `AuthorizePaymentInPaymentService`
 * [ ] `UpdateOrderStatusToPaymentTimeoutWorker`
-* [ ] Timer flow connects to `Gateway_CompensationEntry` (compensation workers in Phase 9)
+* [ ] Timer flow → `Gateway_CompensationEntry`
 
-#### 8.3 Shipping retry (§4.6 / LLD §9)
+For test profile:
 
-* [ ] `zeebe:taskDefinition retries="3"` on `CreateShipmentInShippingService`
-* [ ] `zeebe:header key="retryBackoff" value="PT30S"`
-* [ ] Shipping stub: `failFirstNCalls=2` toggle for tests
-* [ ] Worker throws retriable error on transient failure; BPMN error on exhaustion
+```text
+PT15M → PT1M
+```
 
-### Verification
+### 8.3 Shipping retry
 
-| Scenario                            | Expected                                            |
-| ----------------------------------- | --------------------------------------------------- |
-| High-risk customer (fraud score 85) | Task appears in Tasklist; approve → COMPLETED       |
-| Same, but reject                    | Routes toward compensation (Phase 9)                |
-| Payment timer                       | Use `PT1M` in test profile; order → PAYMENT_TIMEOUT |
-| Shipping retry                      | Logs show 3 attempts; success on 3rd                |
+* [ ] `retries="3"` on `CreateShipmentInShippingService`
+* [ ] Retry backoff:
+  `PT30S`
+* [ ] Shipping stub:
+  `failFirstNCalls=2`
+* [ ] Worker throws retriable error on transient failure
+* [ ] BPMN error on exhaustion
+
+## Verification
+
+| Scenario           | Expected                   |
+| ------------------ | -------------------------- |
+| High-risk customer | Task appears in Tasklist   |
+| Fraud approve      | `COMPLETED`                |
+| Fraud reject       | Compensation path          |
+| Payment timer      | `PAYMENT_TIMEOUT`          |
+| Shipping retry     | 3 attempts, success on 3rd |
 
 ---
 
-## Phase 9 — Compensation chain
+# Phase 9 — Compensation chain
 
-### Objective
+## Objective
 
-When a step fails after prior steps succeeded, the saga rolls back cleanly. Maps to HLD G2.
+When a step fails after prior steps succeeded, the saga rolls back cleanly.
 
-### Exit criteria
+Maps to HLD G2.
 
-* [ ] Compensation workers §4.7 all implemented
-* [ ] Scenario: payment captured + shipping fails (after retries) → refund + release inventory + notify + `CANCELLED`
-* [ ] Scenario: fraud rejected → void auth + release inventory
-* [ ] Scenario: payment timeout → void + release
-* [ ] Each compensation step is **idempotent** (safe to retry)
+## Exit criteria
+
+* [ ] Compensation workers implemented
+* [ ] Shipping failure → refund + release inventory + notify + `CANCELLED`
+* [ ] Fraud rejected → void auth + release inventory
+* [ ] Payment timeout → void + release
+* [ ] Every compensation step is idempotent
 * [ ] `compensationReason` variable set on entry
 
-### Steps
+## Steps
 
-#### 9.1 Compensation workers (§4.7)
+### 9.1 Compensation workers
 
 * [ ] `VoidPaymentInPaymentServiceWorker`
 * [ ] `RefundPaymentInPaymentServiceWorker`
-* [ ] `CancelShipmentInShippingServiceWorker` (no-op if no shipmentId)
+* [ ] `CancelShipmentInShippingServiceWorker`
 * [ ] `ReleaseInventoryInInventoryServiceWorker`
 * [ ] `BuildOrderCancelledNotificationRequestWorker`
 * [ ] `SendOrderCancelledNotificationWorker`
 * [ ] `UpdateOrderStatusToCancelledWorker`
 
-#### 9.2 BPMN compensation flow
+### 9.2 BPMN compensation flow
 
-* [ ] `Gateway_CompensationEntry` — merge timer, fraud reject, shipping fail
-* [ ] `Gateway_PaymentCompensationType` — `CAPTURED` → refund; `AUTHORIZED` only → void
+* [ ] `Gateway_CompensationEntry`
+
+  * merge timer
+  * fraud reject
+  * shipping failure
+
+* [ ] `Gateway_PaymentCompensationType`
+
+  * `CAPTURED` → refund
+  * `AUTHORIZED` → void
+
 * [ ] End event `OrderCancelled`
+
 * [ ] Error boundary on `CreateShipmentInShippingService` → compensation
 
-#### 9.3 Idempotent undo
+### 9.3 Idempotent undo
 
-* [ ] Payment: skip refund if already `REFUNDED`
-* [ ] Inventory: skip release if already `RELEASED`
-* [ ] Shipping: skip cancel if already `CANCELLED`
+* [ ] Payment:
 
-### Verification
+  * skip refund if already `REFUNDED`
+
+* [ ] Inventory:
+
+  * skip release if already `RELEASED`
+
+* [ ] Shipping:
+
+  * skip cancel if already `CANCELLED`
+
+## Verification
 
 | Scenario                   | Expected final status                               |
 | -------------------------- | --------------------------------------------------- |
 | Shipping exhausted retries | `CANCELLED`, payment `REFUNDED`, inventory released |
 | Fraud rejected             | `CANCELLED`, payment voided                         |
 | Payment timeout            | `CANCELLED`, inventory released                     |
-| Customer notification      | `ORDER_CANCELLED` template sent                     |
+| Customer notification      | `ORDER_CANCELLED` sent                              |
 
 ---
 
-## Phase 10 — Kafka events & observability
+# Phase 10 — Kafka events & observability
 
-### Objective
+## Objective
 
-Event-driven audit trail and production-grade visibility. Maps to HLD G7.
+Event-driven audit trail and production-grade visibility.
 
-### Exit criteria
+Maps to HLD G7.
 
-* [ ] All services publish to Kafka topics per [LLD §6](./LLD.md#6-kafka-event-schemas)
-* [ ] Event envelope includes `eventId`, `correlationId`, `orderId`
+## Exit criteria
+
+* [ ] All services publish Kafka events
+
+* [ ] Event envelope includes:
+
+  * `eventId`
+  * `correlationId`
+  * `orderId`
+
 * [ ] Prometheus metrics exposed on all services
-* [ ] Grafana dashboard: order throughput, failure rate, workflow duration, compensation count
-* [ ] Alerts documented (optional for personal project)
 
-### Steps
+* [ ] Grafana dashboard:
 
-#### 10.1 Kafka producers
+  * order throughput
+  * failure rate
+  * workflow duration
+  * compensation count
 
-* [ ] `order-common` `EventPublisher` utility
-* [ ] Per service: publish on state changes (see LLD §6.2 event types)
+* [ ] Alerts documented
+
+## Steps
+
+### 10.1 Kafka producers
+
+* [ ] `order-common` `EventPublisher`
+* [ ] Per-service state-change events
 * [ ] Partition key = `orderId`
 
-#### 10.2 Metrics
+### 10.2 Metrics
 
-* [ ] Micrometer counters: `order.created`, `payment.refund`, `workflow.compensation.triggered`, `fraud.review.required`
-* [ ] Timer: `workflow.job.duration` tagged by `jobType`
-* [ ] Update `deploy/prometheus/prometheus.yml` with all targets
+Counters:
 
-#### 10.3 Grafana
+```text
+order.created
+payment.refund
+workflow.compensation.triggered
+fraud.review.required
+```
 
-* [ ] Dashboard JSON: `deploy/grafana/dashboards/order-orchestration.json`
-* [ ] Panels: orders/hour, success %, p95 job duration, compensation rate, fraud queue
+Timer:
 
-#### 10.4 Distributed tracing (optional but recommended)
+```text
+workflow.job.duration
+```
 
-* [ ] OTEL exporter config in `application.yml`
-* [ ] Trace across order → orchestration → domain services
+Tagged by:
 
-### Verification
+```text
+jobType
+```
+
+* [ ] Update `deploy/prometheus/prometheus.yml`
+
+### 10.3 Grafana
+
+* [ ] Dashboard:
+  `deploy/grafana/dashboards/order-orchestration.json`
+
+Panels:
+
+* [ ] orders/hour
+* [ ] success %
+* [ ] p95 job duration
+* [ ] compensation rate
+* [ ] fraud queue
+
+### 10.4 Distributed tracing
+
+Optional but recommended:
+
+* [ ] OTEL exporter config
+* [ ] Trace:
+  `order → orchestration → domain services`
+
+## Verification
 
 * [ ] Create order → message on `order.events`
 * [ ] Capture payment → message on `payment.events`
-* [ ] Grafana shows order count increment
-* [ ] Prometheus `workflow_compensation_triggered_total` increments on failure test
+* [ ] Grafana order count increments
+* [ ] Compensation metric increments on failure
 
 ---
 
-## Phase 11 — Integration tests & demo
+# Phase 11 — Integration tests & demo
 
-### Objective
+## Objective
 
-Automated confidence, README, and resume-ready artifacts. Validates HLD G1–G8 together.
+Automated confidence, README, and resume-ready artifacts.
 
-### Exit criteria
+Validates HLD G1–G8 together.
+
+## Exit criteria
 
 * [ ] Testcontainers integration tests for happy path + 2 failure paths
-* [ ] `README.md` complete: architecture, local run, curl examples, BPMN screenshot
+* [ ] `README.md` complete
 * [ ] All OpenAPI specs accessible
-* [ ] Demo script: 3-minute walkthrough documented
-* [ ] No critical linter/test failures in CI (GitHub Actions optional)
+* [ ] Demo script: 3-minute walkthrough
+* [ ] No critical linter/test failures in CI
 
-### Steps
+## Steps
 
-#### 11.1 Integration tests
+### 11.1 Integration tests
 
-* [ ] `HappyPathIntegrationTest` — Testcontainers: Postgres, Redis, Kafka, Zeebe (or embedded)
-* [ ] `CompensationIntegrationTest` — shipping failure → cancelled + refunded
-* [ ] `FraudReviewIntegrationTest` — mock Tasklist completion via Zeebe message/API
-* [ ] `PaymentTimeoutIntegrationTest` — short timer profile
+* [ ] `HappyPathIntegrationTest`
 
-#### 11.2 Demo & docs
+  * Testcontainers
+  * PostgreSQL
+  * Redis
+  * Kafka
+  * Zeebe
 
-* [ ] BPMN screenshot → `docs/images/order-fulfillment-bpmn.png`
+* [ ] `CompensationIntegrationTest`
+
+  * shipping failure
+  * cancelled
+  * refunded
+
+* [ ] `FraudReviewIntegrationTest`
+
+  * Tasklist completion
+
+* [ ] `PaymentTimeoutIntegrationTest`
+
+  * short timer profile
+
+### 11.2 Demo & docs
+
+* [ ] BPMN screenshot:
+  `docs/images/order-fulfillment-bpmn.png`
+
 * [ ] Operate process instance screenshot
-* [ ] `docs/DEMO.md` — step-by-step demo script
-* [ ] `docs/verification/` — all phase smoke tests consolidated
 
-#### 11.3 Docker Compose full stack
+* [ ] `docs/DEMO.md`
 
-* [ ] Uncomment all app services in `docker-compose.yml`
+* [ ] `docs/verification/`
+
+### 11.3 Docker Compose full stack
+
+* [ ] Uncomment all app services
 * [ ] `docker compose up` runs full system
-* [ ] `make demo` or `./scripts/demo.sh` (optional convenience)
 
-#### 11.4 Final review checklist
-
-* [ ] Every activity in IMPLEMENTATION-PATTERNS §4 has a worker + BPMN task
-* [ ] Every LLD API endpoint has implementation or explicit deferral note
-* [ ] Logging works in JSON mode (`SPRING_PROFILES_ACTIVE=prod`)
-* [ ] Idempotency verified on `POST /orders` and `POST /reservations`
-
-### Verification
+Optional:
 
 ```bash
-mvn verify                    # all integration tests pass
-docker compose up -d          # full stack healthy
-./scripts/demo.sh             # happy path demo completes
+make demo
+```
+
+or
+
+```bash
+./scripts/demo.sh
+```
+
+### 11.4 Final review checklist
+
+* [ ] Every activity in IMPLEMENTATION-PATTERNS §4 has a worker + BPMN task
+* [ ] Every LLD API endpoint implemented or explicitly deferred
+* [ ] JSON logging works with:
+
+```text
+SPRING_PROFILES_ACTIVE=prod
+```
+
+* [ ] Idempotency verified on:
+
+  * `POST /orders`
+  * `POST /reservations`
+
+## Verification
+
+```bash
+mvn verify
+
+docker compose up -d
+
+./scripts/demo.sh
+
+# Happy path demo should complete successfully.
 ```
 
 ---
 
-## Master checklist (all phases)
+# Master checklist
 
-Use this as the final gate before calling the project v1 complete.
-
-### Architecture
+## Architecture
 
 * [ ] 6 domain microservices + 1 orchestration app
-* [ ] Camunda 8 Zeebe orchestrates; domain services are REST-only
-* [ ] ~35 granular BPMN activities (not coarse steps)
+* [ ] Camunda 8 Zeebe orchestrates
+* [ ] Domain services are REST-only
+* [ ] ~35 granular BPMN activities
 * [ ] Activity → Service → Client layering throughout
 
-### HLD goals
+## HLD goals
 
 * [ ] **G1** Multi-step orchestration with service boundaries
 * [ ] **G2** Compensation / saga rollback
 * [ ] **G3** Parallel inventory + payment + fraud
-* [ ] **G4** Human fraud review (score > 80)
-* [ ] **G5** Payment timeout (15 min)
-* [ ] **G6** Shipping retry (3×, 30s)
+* [ ] **G4** Human fraud review — score > 80
+* [ ] **G5** Payment timeout — 15 min
+* [ ] **G6** Shipping retry — 3×, 30s
 * [ ] **G7** Logs + metrics + Grafana
 * [ ] **G8** Docker Compose local stack; stateless services
 
-### Operations
+## Operations
 
 * [ ] Health endpoints on all services
 * [ ] Correlation ID end-to-end
@@ -825,32 +1200,98 @@ Use this as the final gate before calling the project v1 complete.
 
 ---
 
-## Appendix A — Worker ↔ BPMN quick reference
+# Appendix A — Worker ↔ BPMN quick reference
 
-When implementing, use this order (matches dependency flow):
+## Phase 7 order
 
+```text
+1. GetOrderForFulfillment
+
+2. ValidateOrderItems
+   ↓
+   ValidateShippingAddress
+   ↓
+   Gateway
+   ↓
+   UpdateOrderStatusToValidated
+
+3. ParallelFork
+
+   ├── BuildReserve
+   │   → Reserve
+   │   → ExtractReservation
+   │
+   ├── BuildAuthorize
+   │   → Authorize
+   │   → ExtractPayment
+   │
+   └── BuildFraud
+       → Assess
+       → ExtractFraudScore
+
+   ↓
+ParallelJoin
+
+4. CapturePayment
+   ↓
+   UpdateOrderStatusToPaid
+
+5. BuildShipment
+   ↓
+   CreateShipment
+   ↓
+   ExtractShipment
+   ↓
+   UpdateOrderStatusToShipped
+
+6. BuildNotification
+   ↓
+   SendNotification
+   ↓
+   GenerateInvoice
+   ↓
+   UpdateOrderStatusToCompleted
 ```
-Phase 7 order:
-  1. GetOrderForFulfillment
-  2. ValidateOrderItems → ValidateShippingAddress → Gateway → UpdateOrderStatusToValidated
-  3. ParallelFork → [BuildReserve → Reserve → ExtractReservation |
-                   BuildAuthorize → Authorize → ExtractPayment |
-                   BuildFraud → Assess → ExtractFraudScore] → ParallelJoin
-  4. CapturePayment → UpdateOrderStatusToPaid
-  5. BuildShipment → CreateShipment → ExtractShipment → UpdateOrderStatusToShipped
-  6. BuildNotification → SendNotification → GenerateInvoice → UpdateOrderStatusToCompleted
 
-Phase 8 additions:
-  Gateway_FraudReview → UserTask → RecordDecision → Gateway_FraudApproved
-  Timer on Authorize → UpdateOrderStatusToPaymentTimeout
+## Phase 8 additions
 
-Phase 9 additions:
-  Gateway_Compensation → Void/Refund → CancelShipment → ReleaseInventory → Notify → Cancelled
+```text
+Gateway_FraudReview
+    ↓
+UserTask
+    ↓
+RecordDecision
+    ↓
+Gateway_FraudApproved
+```
+
+```text
+AuthorizePayment
+    │
+    └── Boundary Timer
+            ↓
+    UpdateOrderStatusToPaymentTimeout
+```
+
+## Phase 9 additions
+
+```text
+Gateway_Compensation
+    ↓
+Void / Refund
+    ↓
+CancelShipment
+    ↓
+ReleaseInventory
+    ↓
+Notify
+    ↓
+Cancelled
 ```
 
 ---
 
-## Appendix B — Suggested git branch strategy
+# Appendix B — Suggested Git branch strategy
 
 | Branch                  | Phase                              |
 | ----------------------- | ---------------------------------- |
@@ -863,11 +1304,11 @@ Phase 9 additions:
 
 ---
 
-## Appendix C — Document links
+# Appendix C — Document links
 
-| Doc                                                        | Purpose                            |
-| ---------------------------------------------------------- | ---------------------------------- |
-| [HLD.md](./HLD.md)                                         | Architecture & goals               |
-| [LLD.md](./LLD.md)                                         | APIs, schemas, Kafka, logging      |
-| [IMPLEMENTATION-PATTERNS.md](./IMPLEMENTATION-PATTERNS.md) | Activity catalog, code patterns    |
-| [IMPLEMENTATION-PHASES.md](./IMPLEMENTATION-PHASES.md)     | This file — step-by-step execution |
+| Doc                                                        | Purpose                         |
+| ---------------------------------------------------------- | ------------------------------- |
+| [HLD.md](./HLD.md)                                         | Architecture & goals            |
+| [LLD.md](./LLD.md)                                         | APIs, schemas, Kafka, logging   |
+| [IMPLEMENTATION-PATTERNS.md](./IMPLEMENTATION-PATTERNS.md) | Activity catalog, code patterns |
+| [IMPLEMENTATION-PHASES.md](./IMPLEMENTATION-PHASES.md)     | Step-by-step execution          |

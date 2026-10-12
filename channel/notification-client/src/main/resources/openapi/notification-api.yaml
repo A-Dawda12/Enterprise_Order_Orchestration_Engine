@@ -1,0 +1,121 @@
+openapi: 3.0.3
+
+info:
+  title: Notification Service API
+  description: Send and get notification APIs
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8086/notifications
+    description: Local
+
+tags:
+  - name: Notifications
+  - name: Health
+
+paths:
+  /v1/health:
+    get:
+      tags:
+        - Health
+      summary: Health probe
+      operationId: health
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /v1/notifications/send:
+    post:
+      tags:
+        - Notifications
+      summary: Send notification
+      operationId: send
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendNotificationRequest"
+      responses:
+        "202":
+          description: Queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+
+  /v1/notifications/{notificationId}:
+    get:
+      tags:
+        - Notifications
+      summary: Get notification
+      operationId: getNotification
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationResponse"
+        "404":
+          description: Notification not found
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    SendNotificationRequest:
+      type: object
+      required:
+        - orderId
+        - customerId
+        - channel
+        - template
+      properties:
+        orderId:
+          type: string
+        customerId:
+          type: string
+        channel:
+          type: string
+        template:
+          type: string
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+
+    NotificationResponse:
+      type: object
+      properties:
+        notificationId:
+          type: string
+        status:
+          type: string
+        channel:
+          type: string
+        recipient:
+          type: string
+        queuedAt:
+          type: string
+          format: date-time

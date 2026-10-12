@@ -1,0 +1,223 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  description: Authorize, capture, refund, and void APIs
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8083/payments
+    description: Local
+
+tags:
+  - name: Payments
+  - name: Health
+
+paths:
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Health probe
+      operationId: health
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /v1/payments/authorize:
+    post:
+      tags: [Payments]
+      summary: Authorize payment
+      operationId: authorize
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthorizeRequest"
+      responses:
+        "201":
+          description: Payment authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+
+  /v1/payments/{paymentId}:
+    get:
+      tags: [Payments]
+      summary: Get payment
+      operationId: getPayment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+        "404":
+          description: Payment not found
+
+  /v1/payments/{paymentId}/capture:
+    post:
+      tags: [Payments]
+      summary: Capture payment
+      operationId: capture
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaptureRequest"
+      responses:
+        "200":
+          description: Payment captured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+
+  /v1/payments/{paymentId}/refund:
+    post:
+      tags: [Payments]
+      summary: Refund payment
+      operationId: refund
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundRequest"
+      responses:
+        "201":
+          description: Refund created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundResponse"
+
+  /v1/payments/{paymentId}/void:
+    post:
+      tags: [Payments]
+      summary: Void authorization
+      operationId: voidAuthorization
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Authorization voided
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    AuthorizeRequest:
+      type: object
+      required:
+        - orderId
+        - customerId
+        - amount
+        - currency
+        - paymentMethodToken
+      properties:
+        orderId:
+          type: string
+        customerId:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        paymentMethodToken:
+          type: string
+
+    CaptureRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+
+    RefundRequest:
+      type: object
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+        amount:
+          type: number
+
+    PaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        orderId:
+          type: string
+        status:
+          type: string
+        authorizedAmount:
+          type: number
+        capturedAmount:
+          type: number
+        currency:
+          type: string
+        authorizedAt:
+          type: string
+          format: date-time
+
+    RefundResponse:
+      type: object
+      properties:
+        refundId:
+          type: string
+        paymentId:
+          type: string
+        status:
+          type: string
+        refundedAmount:
+          type: number
+        refundedAt:
+          type: string
+          format: date-time
