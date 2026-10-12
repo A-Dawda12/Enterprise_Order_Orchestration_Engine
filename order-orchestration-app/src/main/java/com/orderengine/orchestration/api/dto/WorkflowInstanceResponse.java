@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record WorkflowInstanceResponse(
-        String idempotencyKey,
+        String instanceKey,
         String processDefinitionId,
         int processDefinitionVersion,
         UUID orderId,
