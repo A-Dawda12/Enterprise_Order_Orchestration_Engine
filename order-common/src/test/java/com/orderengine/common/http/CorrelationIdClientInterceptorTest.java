@@ -46,4 +46,15 @@ public class CorrelationIdClientInterceptorTest {
         assertThat(request.getHeaders().getFirst(OrderEngineConstants.CORRELATION_ID_HEADER)).
                 isEqualTo("from-request");
     }
+
+    @Test
+    void copiesTraceparentFromMdcOntoOutboundRequest() throws Exception {
+        MDC.put(MdcKeys.TRACEPARENT, "trace-outbound-1");
+        MockClientHttpRequest request = new MockClientHttpRequest(HttpMethod.GET, URI.create("http://localhost/orders/v1/health"));
+        ClientHttpRequestExecution execution =  (req, body) -> new MockClientHttpResponse(new byte[0], OK);
+        interceptor.intercept(request, new byte[0], execution);
+
+        assertThat(request.getHeaders().getFirst(OrderEngineConstants.TRACEPARENT_HEADER)).
+                isEqualTo("trace-outbound-1");
+    }
 }

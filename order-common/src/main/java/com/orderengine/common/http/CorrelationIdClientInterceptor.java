@@ -23,6 +23,12 @@ public class CorrelationIdClientInterceptor implements ClientHttpRequestIntercep
         && !request.getHeaders().containsHeader(OrderEngineConstants.CORRELATION_ID_HEADER)) {
             request.getHeaders().set(OrderEngineConstants.CORRELATION_ID_HEADER, correlationId);
         }
+
+        String traceparent = MDC.get(MdcKeys.TRACEPARENT);
+        if(traceparent != null && !traceparent.isBlank()
+        && !request.getHeaders().containsHeader(OrderEngineConstants.TRACEPARENT_HEADER)) {
+            request.getHeaders().set(OrderEngineConstants.TRACEPARENT_HEADER, traceparent);
+        }
         return execution.execute(request, body);
     }
 }
