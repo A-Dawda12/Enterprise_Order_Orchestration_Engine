@@ -11,7 +11,7 @@ public class DomainServiceException extends OrderEngineException {
         this.httpStatus = httpStatus;
     }
 
-    public String ServiceName() {
+    public String serviceName() {
         return serviceName;
     }
 

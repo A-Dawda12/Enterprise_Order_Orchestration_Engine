@@ -32,7 +32,7 @@ public class OrderController {
     }
 
     @PostMapping
-    @Operation(summary = "Create order", description = "Creates a new order for a customer with the specified items and shipping address.")
+    @Operation(summary = "Create order", description = "Creates a new order for a customer with the specified items and shipping address, start workflow")
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         log.info("createOrder customerId={} itemCount={}", request.customerId(), request.items().size());
         OrderEntity created = orderService.createOrder(
