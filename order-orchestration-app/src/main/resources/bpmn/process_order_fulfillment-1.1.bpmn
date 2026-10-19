@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_order_fulfillment" targetNamespace="http://camunda.org/schema/1.0/bpmn" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:process id="process_order_fulfillment" name="Order Fulfillment" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_OrderReceived" name="Order Received">
+      <bpmn:outgoing>Flow_StartToGetOrder</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="GetOrderForFulfillment" name="GetOrderForFulfillment">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="GetOrderForFulfillment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_StartToGetOrder</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hekur2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
+      <bpmn:incoming>Flow_0opfw15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_StartToGetOrder" sourceRef="StartEvent_OrderReceived" targetRef="GetOrderForFulfillment" />
+    <bpmn:serviceTask id="ValidateOrderItems" name="ValidateOrderItems">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ValidateOrderItems" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0hekur2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0opfw15</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0opfw15" sourceRef="ValidateOrderItems" targetRef="EndEvent_Complete" />
+    <bpmn:sequenceFlow id="Flow_0hekur2" sourceRef="GetOrderForFulfillment" targetRef="ValidateOrderItems" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
+      <bpmndi:BPMNShape id="GetOrderForFulfillment_di" bpmnElement="GetOrderForFulfillment">
+        <omgdc:Bounds x="260" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Complete_di" bpmnElement="EndEvent_Complete">
+        <omgdc:Bounds x="552" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="546" y="76" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1k8mkl5" bpmnElement="ValidateOrderItems">
+        <omgdc:Bounds x="400" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_OrderReceived_di" bpmnElement="StartEvent_OrderReceived">
+        <omgdc:Bounds x="162" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="141" y="136" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
+        <omgdi:waypoint x="198" y="118" />
+        <omgdi:waypoint x="260" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0opfw15_di" bpmnElement="Flow_0opfw15">
+        <omgdi:waypoint x="500" y="118" />
+        <omgdi:waypoint x="552" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hekur2_di" bpmnElement="Flow_0hekur2">
+        <omgdi:waypoint x="360" y="118" />
+        <omgdi:waypoint x="400" y="118" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

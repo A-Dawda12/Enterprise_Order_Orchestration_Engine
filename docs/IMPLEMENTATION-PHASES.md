@@ -789,9 +789,9 @@ Full successful order flow without fraud review, failures, or compensation. Impl
 
 #### 7.1 Validation workers (§4.1)
 
-- [ ] `ValidateOrderItemsWorker`
+- [x] `ValidateOrderItemsWorker` - `POST /ordrs/v1/orders/{id}/validate` → `validItems`, `validationErrors` variables (BPMN 1.1)
 
-- [ ] `ValidateShippingAddressWorker`
+- [x] `ValidateShippingAddressWorker`
 
 - [ ] `UpdateOrderStatusToValidatedWorker`
 
