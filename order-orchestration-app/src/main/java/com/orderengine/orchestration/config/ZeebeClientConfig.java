@@ -1,6 +1,8 @@
 package com.orderengine.orchestration.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.client.ZeebeClient;
+import io.camunda.zeebe.client.impl.ZeebeObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,12 +13,14 @@ public class ZeebeClientConfig {
     @Bean(destroyMethod = "close")
     ZeebeClient zeebeClient(
             @Value("${zeebe.client.broker.contactPoint:http://localhost:26500}") String grpcAddress,
-            @Value("${zeebe.client.broker.rest-address:http://localhost:8080}") String restAddress
+            @Value("${zeebe.client.broker.rest-address:http://localhost:8080}") String restAddress,
+            ObjectMapper objectMapper
     ) {
         return ZeebeClient.newClientBuilder()
                 .grpcAddress(java.net.URI.create(grpcAddress))
                 .restAddress(java.net.URI.create(restAddress))
                 .usePlaintext()
+                .withJsonMapper(new ZeebeObjectMapper(objectMapper.copy()))
                 .build();
     }
 }

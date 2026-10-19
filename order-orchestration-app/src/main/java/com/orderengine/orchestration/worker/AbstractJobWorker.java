@@ -32,11 +32,12 @@ public abstract class AbstractJobWorker implements JobHandler {
         log.info("JOB IN activity={} orderId={}", job.getType(), orderId);
         try{
             Map<String, Object> outputVariables = execute(job);
+            Map<String, Object> output = outputVariables == null ? Map.of() : outputVariables;
             client.newCompleteCommand(job.getKey())
-                    .variables(outputVariables == null ? Map.of() : outputVariables)
+                    .variables(output)
                     .send()
                     .join();
-            log.info("JOB OUT activity={} orderId={} durationMs={}", job.getType(), orderId, System.currentTimeMillis() - startAt);
+            log.info("JOB OUT activity={} orderId={} durationMs={} output={}", job.getType(), orderId, System.currentTimeMillis() - startAt, output);
         }catch (Exception ex) {
             log.error("JOB OUT activity={} orderId={} status=FAILED durationMs={} reason={}",
                     job.getType(), orderId, System.currentTimeMillis() - startAt, ex.getMessage(), ex);
