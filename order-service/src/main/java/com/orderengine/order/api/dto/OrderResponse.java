@@ -20,7 +20,7 @@ public record OrderResponse(
 ) {
     public record OrderItemResponse(
             String sku,
-            int quality,
+            int quantity,
             BigDecimal unitPrice
     ){
     }

@@ -28,12 +28,12 @@
       <bpmn:outgoing>Flow_0gkz6ue</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_07bh6wb" sourceRef="ValidateOrderItems" targetRef="ValidateShippingAddress" />
-    <bpmn:serviceTask id="ActivityUpdateOrderStatusToValidated_18t02aa" name="UpdateOrderStatusToValidated">
+    <bpmn:serviceTask id="UpdateOrderStatusToValidated" name="UpdateOrderStatusToValidated">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="UpdateOrderStatusToValidated" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_GatewayToValidated</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ly8bcg</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1loau75</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="UpdateOrderStatusToRejected" name="UpdateOrderStatusToRejected">
       <bpmn:extensionElements>
@@ -42,10 +42,6 @@
       <bpmn:incoming>Flow_GatewayToRejected</bpmn:incoming>
       <bpmn:outgoing>Flow_0rms0qo</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_0ly8bcg</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0ly8bcg" sourceRef="ActivityUpdateOrderStatusToValidated_18t02aa" targetRef="EndEvent_Complete" />
     <bpmn:endEvent id="EndEvent_Rejected" name="Rejected">
       <bpmn:incoming>Flow_0rms0qo</bpmn:incoming>
     </bpmn:endEvent>
@@ -56,10 +52,38 @@
       <bpmn:outgoing>Flow_GatewayToRejected</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_0gkz6ue" sourceRef="ValidateShippingAddress" targetRef="Gateway_ValidationResult" />
-    <bpmn:sequenceFlow id="Flow_GatewayToValidated" name="valid" sourceRef="Gateway_ValidationResult" targetRef="ActivityUpdateOrderStatusToValidated_18t02aa">
+    <bpmn:sequenceFlow id="Flow_GatewayToValidated" name="valid" sourceRef="Gateway_ValidationResult" targetRef="UpdateOrderStatusToValidated">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=validItems = true and validAddress = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_GatewayToRejected" name="Invalid" sourceRef="Gateway_ValidationResult" targetRef="UpdateOrderStatusToRejected" />
+    <bpmn:serviceTask id="BuildReverseInventoryRequest" name="BuildReverseInventoryRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildReverseInventoryRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1loau75</bpmn:incoming>
+      <bpmn:outgoing>Flow_1op5n5i</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ReserveInventoryInInventoryService" name="ReserveInventoryInInventoryService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ReserveInventoryInInventoryService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1op5n5i</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tf18c9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ExtractReservationId" name="ExtractReservationId">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ExtractReservationId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0tf18c9</bpmn:incoming>
+      <bpmn:outgoing>Flow_0casady</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
+      <bpmn:incoming>Flow_0casady</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1loau75" sourceRef="UpdateOrderStatusToValidated" targetRef="BuildReverseInventoryRequest" />
+    <bpmn:sequenceFlow id="Flow_1op5n5i" sourceRef="BuildReverseInventoryRequest" targetRef="ReserveInventoryInInventoryService" />
+    <bpmn:sequenceFlow id="Flow_0tf18c9" sourceRef="ReserveInventoryInInventoryService" targetRef="ExtractReservationId" />
+    <bpmn:sequenceFlow id="Flow_0casady" sourceRef="ExtractReservationId" targetRef="EndEvent_Complete" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -80,30 +104,42 @@
         <omgdc:Bounds x="540" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1tkl8y3" bpmnElement="ActivityUpdateOrderStatusToValidated_18t02aa">
-        <omgdc:Bounds x="870" y="78" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_1tkl8y3" bpmnElement="UpdateOrderStatusToValidated">
+        <omgdc:Bounds x="830" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1lihiwh" bpmnElement="UpdateOrderStatusToRejected">
-        <omgdc:Bounds x="870" y="210" width="100" height="80" />
+        <omgdc:Bounds x="660" y="210" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1yzagh1" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="1042" y="100" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1036" y="76" width="48" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1380gy3_di" bpmnElement="EndEvent_Rejected">
-        <omgdc:Bounds x="1042" y="232" width="36" height="36" />
+        <omgdc:Bounds x="692" y="362" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1038" y="275" width="44" height="14" />
+          <omgdc:Bounds x="688" y="405" width="44" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1yyigds_di" bpmnElement="Gateway_ValidationResult" isMarkerVisible="true">
         <omgdc:Bounds x="685" y="93" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="695" y="153" width="30" height="14" />
+          <omgdc:Bounds x="695" y="69" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
+        <omgdc:Bounds x="1000" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
+        <omgdc:Bounds x="1180" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
+        <omgdc:Bounds x="1350" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1p2it5p" bpmnElement="EndEvent_Complete">
+        <omgdc:Bounds x="1522" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1516" y="76" width="48" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
@@ -118,13 +154,9 @@
         <omgdi:waypoint x="500" y="118" />
         <omgdi:waypoint x="540" y="118" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ly8bcg_di" bpmnElement="Flow_0ly8bcg">
-        <omgdi:waypoint x="970" y="118" />
-        <omgdi:waypoint x="1042" y="118" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0rms0qo_di" bpmnElement="Flow_0rms0qo">
-        <omgdi:waypoint x="970" y="250" />
-        <omgdi:waypoint x="1042" y="250" />
+        <omgdi:waypoint x="710" y="290" />
+        <omgdi:waypoint x="710" y="362" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0gkz6ue_di" bpmnElement="Flow_0gkz6ue">
         <omgdi:waypoint x="640" y="118" />
@@ -132,18 +164,33 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0plt5p0_di" bpmnElement="Flow_GatewayToValidated">
         <omgdi:waypoint x="735" y="118" />
-        <omgdi:waypoint x="870" y="118" />
+        <omgdi:waypoint x="830" y="118" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="791" y="100" width="23" height="14" />
+          <omgdc:Bounds x="771" y="100" width="23" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1j4wjvr_di" bpmnElement="Flow_GatewayToRejected">
         <omgdi:waypoint x="710" y="143" />
-        <omgdi:waypoint x="710" y="250" />
-        <omgdi:waypoint x="870" y="250" />
+        <omgdi:waypoint x="710" y="210" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="724" y="213" width="32" height="14" />
+          <omgdc:Bounds x="724" y="184" width="32" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1loau75_di" bpmnElement="Flow_1loau75">
+        <omgdi:waypoint x="930" y="118" />
+        <omgdi:waypoint x="1000" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1op5n5i_di" bpmnElement="Flow_1op5n5i">
+        <omgdi:waypoint x="1100" y="118" />
+        <omgdi:waypoint x="1180" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tf18c9_di" bpmnElement="Flow_0tf18c9">
+        <omgdi:waypoint x="1280" y="118" />
+        <omgdi:waypoint x="1350" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0casady_di" bpmnElement="Flow_0casady">
+        <omgdi:waypoint x="1450" y="118" />
+        <omgdi:waypoint x="1522" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
