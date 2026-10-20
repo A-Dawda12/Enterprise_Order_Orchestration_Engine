@@ -75,15 +75,39 @@
         <zeebe:taskDefinition type="ExtractReservationId" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0tf18c9</bpmn:incoming>
-      <bpmn:outgoing>Flow_0casady</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1miguyr</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_0casady</bpmn:incoming>
-    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1loau75" sourceRef="UpdateOrderStatusToValidated" targetRef="BuildReverseInventoryRequest" />
     <bpmn:sequenceFlow id="Flow_1op5n5i" sourceRef="BuildReverseInventoryRequest" targetRef="ReserveInventoryInInventoryService" />
     <bpmn:sequenceFlow id="Flow_0tf18c9" sourceRef="ReserveInventoryInInventoryService" targetRef="ExtractReservationId" />
-    <bpmn:sequenceFlow id="Flow_0casady" sourceRef="ExtractReservationId" targetRef="EndEvent_Complete" />
+    <bpmn:serviceTask id="AuthorizePaymentInPaymentService" name="AuthorizePaymentInPaymentService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="AuthorizePaymentInPaymentService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1xb44ya</bpmn:incoming>
+      <bpmn:outgoing>Flow_1x73g6v</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="BuildAuthorizePaymentRequest" name="BuildAuthorizePaymentRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildAuthorizePaymentRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1miguyr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xb44ya</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ExtractPaymentId" name="ExtractPaymentId">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ExtractPaymentId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1x73g6v</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hvxr4w</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
+      <bpmn:incoming>Flow_1hvxr4w</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1hvxr4w" sourceRef="ExtractPaymentId" targetRef="EndEvent_Complete" />
+    <bpmn:sequenceFlow id="Flow_1miguyr" sourceRef="ExtractReservationId" targetRef="BuildAuthorizePaymentRequest" />
+    <bpmn:sequenceFlow id="Flow_1xb44ya" sourceRef="BuildAuthorizePaymentRequest" targetRef="AuthorizePaymentInPaymentService" />
+    <bpmn:sequenceFlow id="Flow_1x73g6v" sourceRef="AuthorizePaymentInPaymentService" targetRef="ExtractPaymentId" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -136,11 +160,23 @@
         <omgdc:Bounds x="1350" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1p2it5p" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="1522" y="100" width="36" height="36" />
+      <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
+        <omgdc:Bounds x="2012" y="100" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1516" y="76" width="48" height="14" />
+          <omgdc:Bounds x="2006" y="76" width="48" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
+        <omgdc:Bounds x="1840" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
+        <omgdc:Bounds x="1670" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
+        <omgdc:Bounds x="1510" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
         <omgdi:waypoint x="198" y="118" />
@@ -188,9 +224,21 @@
         <omgdi:waypoint x="1280" y="118" />
         <omgdi:waypoint x="1350" y="118" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0casady_di" bpmnElement="Flow_0casady">
+      <bpmndi:BPMNEdge id="Flow_1hvxr4w_di" bpmnElement="Flow_1hvxr4w">
+        <omgdi:waypoint x="1940" y="118" />
+        <omgdi:waypoint x="2012" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1miguyr_di" bpmnElement="Flow_1miguyr">
         <omgdi:waypoint x="1450" y="118" />
-        <omgdi:waypoint x="1522" y="118" />
+        <omgdi:waypoint x="1510" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xb44ya_di" bpmnElement="Flow_1xb44ya">
+        <omgdi:waypoint x="1610" y="118" />
+        <omgdi:waypoint x="1670" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x73g6v_di" bpmnElement="Flow_1x73g6v">
+        <omgdi:waypoint x="1770" y="118" />
+        <omgdi:waypoint x="1840" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

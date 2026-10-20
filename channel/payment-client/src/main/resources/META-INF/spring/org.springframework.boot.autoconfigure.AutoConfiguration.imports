@@ -1,1 +1,1 @@
-com.orderengine.client.shipping.config.ShippingClientAutoConfiguration
+com.orderengine.client.payment.config.PaymentClientAutoConfiguration

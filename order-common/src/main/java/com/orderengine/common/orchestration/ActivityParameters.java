@@ -10,6 +10,8 @@ public final class ActivityParameters {
     public static final String RESERVE_REQUEST = "reserveRequest";
     public static final String RESERVATION_ID = "reservationId";
     public static final String RESERVATION = "reservation";
+    public static final String PAYMENT_METHOD_TOKEN = "paymentMethodToken";
+    public static final String AUTHORIZE_REQUEST = "authorizeRequest";
     public static final String PAYMENT_ID = "paymentId";
     public static final String PAYMENT = "payment";
     public static final String FRAUD_ASSESSMENT = "fraudAssessment";

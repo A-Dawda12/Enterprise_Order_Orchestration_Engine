@@ -13,7 +13,7 @@ public class OrchestrationClient {
         this.orchestrationApi = orchestrationApi;
     }
 
-    public WorkflowInstanceResponse startOrderFulfillment(UUID orderId) {
-        return orchestrationApi.startOrderFulFillment(new StartWorkflowRequest(orderId));
+    public WorkflowInstanceResponse startOrderFulfillment(UUID orderId, String paymentMethodToken) {
+        return orchestrationApi.startOrderFulFillment(new StartWorkflowRequest(orderId, paymentMethodToken));
     }
 }

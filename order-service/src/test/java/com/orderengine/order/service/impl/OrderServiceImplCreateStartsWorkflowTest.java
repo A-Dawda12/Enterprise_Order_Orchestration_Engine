@@ -2,6 +2,7 @@ package com.orderengine.order.service.impl;
 
 import com.orderengine.order.client.orchestration.OrchestrationClient;
 import com.orderengine.order.client.orchestration.WorkflowInstanceResponse;
+import com.orderengine.order.client.paymentmethod.PaymentMethodTokenProvider;
 import com.orderengine.order.domain.OrderEntity;
 import com.orderengine.order.domain.OrderEventEntity;
 import com.orderengine.order.domain.ShippingAddress;
@@ -45,6 +46,9 @@ class OrderServiceImplCreateStartsWorkflowTest {
     @Mock
     private OrchestrationClient orchestrationClient;
 
+    @Mock
+    private PaymentMethodTokenProvider paymentMethodTokenProvider;
+
     private OrderServiceImpl orderService;
 
     @BeforeEach
@@ -71,6 +75,7 @@ class OrderServiceImplCreateStartsWorkflowTest {
                 orderEventRepository,
                 invoiceRepository,
                 orchestrationClient,
+                paymentMethodTokenProvider,
                 transactionManager
         );
 
@@ -84,8 +89,10 @@ class OrderServiceImplCreateStartsWorkflowTest {
     @Test
     void createOrderStartsWorkflowAndStoresInstanceKey() {
         String instanceKey = "2251799813685249";
-
-        when(orchestrationClient.startOrderFulfillment(any(UUID.class)))
+        String paymentMethodToken = "pm_tok_unit";
+        when(paymentMethodTokenProvider.issueToken(any(String.class), any(String.class)))
+                .thenReturn(paymentMethodToken);
+        when(orchestrationClient.startOrderFulfillment(any(UUID.class), any(String.class)))
                 .thenAnswer(invocation -> {
                     UUID orderId = invocation.getArgument(0);
 
@@ -122,7 +129,8 @@ class OrderServiceImplCreateStartsWorkflowTest {
         assertThat(created.getWorkflowKey()).isEqualTo(instanceKey);
 
         verify(orchestrationClient).startOrderFulfillment(
-                UUID.fromString(created.getOrderId())
+                UUID.fromString(created.getOrderId()),
+                paymentMethodToken
         );
 
         ArgumentCaptor<OrderEntity> saved =
