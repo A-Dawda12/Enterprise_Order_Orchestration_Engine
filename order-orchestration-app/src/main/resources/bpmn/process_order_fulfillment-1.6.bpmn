@@ -99,15 +99,39 @@
         <zeebe:taskDefinition type="ExtractPaymentId" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1x73g6v</bpmn:incoming>
-      <bpmn:outgoing>Flow_1hvxr4w</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1mllnn6</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_1hvxr4w</bpmn:incoming>
+      <bpmn:incoming>Flow_15n5eqo</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1hvxr4w" sourceRef="ExtractPaymentId" targetRef="EndEvent_Complete" />
     <bpmn:sequenceFlow id="Flow_1miguyr" sourceRef="ExtractReservationId" targetRef="BuildAuthorizePaymentRequest" />
     <bpmn:sequenceFlow id="Flow_1xb44ya" sourceRef="BuildAuthorizePaymentRequest" targetRef="AuthorizePaymentInPaymentService" />
     <bpmn:sequenceFlow id="Flow_1x73g6v" sourceRef="AuthorizePaymentInPaymentService" targetRef="ExtractPaymentId" />
+    <bpmn:serviceTask id="BuildFraudAssessmentRequest" name="BuildFraudAssessmentRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildFraudAssessmentRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1mllnn6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yyjs8r</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="AssessFraudInFraudService" name="AssessFraudInFraudService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="AssessFraudInFraudService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0yyjs8r</bpmn:incoming>
+      <bpmn:outgoing>Flow_09g5ajd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ExtractFraudScore" name="ExtractFraudScore">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ExtractFraudScore" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09g5ajd</bpmn:incoming>
+      <bpmn:outgoing>Flow_15n5eqo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1mllnn6" sourceRef="ExtractPaymentId" targetRef="BuildFraudAssessmentRequest" />
+    <bpmn:sequenceFlow id="Flow_0yyjs8r" sourceRef="BuildFraudAssessmentRequest" targetRef="AssessFraudInFraudService" />
+    <bpmn:sequenceFlow id="Flow_09g5ajd" sourceRef="AssessFraudInFraudService" targetRef="ExtractFraudScore" />
+    <bpmn:sequenceFlow id="Flow_15n5eqo" sourceRef="ExtractFraudScore" targetRef="EndEvent_Complete" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -160,22 +184,33 @@
         <omgdc:Bounds x="1350" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="2012" y="100" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2006" y="76" width="48" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
-        <omgdc:Bounds x="1840" y="78" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
         <omgdc:Bounds x="1670" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
         <omgdc:Bounds x="1510" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
+        <omgdc:Bounds x="1840" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1yyap1m" bpmnElement="BuildFraudAssessmentRequest">
+        <omgdc:Bounds x="2000" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
+        <omgdc:Bounds x="2522" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2516" y="76" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
+        <omgdc:Bounds x="2170" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
+        <omgdc:Bounds x="2350" y="78" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
@@ -224,10 +259,6 @@
         <omgdi:waypoint x="1280" y="118" />
         <omgdi:waypoint x="1350" y="118" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1hvxr4w_di" bpmnElement="Flow_1hvxr4w">
-        <omgdi:waypoint x="1940" y="118" />
-        <omgdi:waypoint x="2012" y="118" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1miguyr_di" bpmnElement="Flow_1miguyr">
         <omgdi:waypoint x="1450" y="118" />
         <omgdi:waypoint x="1510" y="118" />
@@ -239,6 +270,22 @@
       <bpmndi:BPMNEdge id="Flow_1x73g6v_di" bpmnElement="Flow_1x73g6v">
         <omgdi:waypoint x="1770" y="118" />
         <omgdi:waypoint x="1840" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mllnn6_di" bpmnElement="Flow_1mllnn6">
+        <omgdi:waypoint x="1940" y="118" />
+        <omgdi:waypoint x="2000" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yyjs8r_di" bpmnElement="Flow_0yyjs8r">
+        <omgdi:waypoint x="2100" y="118" />
+        <omgdi:waypoint x="2170" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09g5ajd_di" bpmnElement="Flow_09g5ajd">
+        <omgdi:waypoint x="2270" y="118" />
+        <omgdi:waypoint x="2350" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15n5eqo_di" bpmnElement="Flow_15n5eqo">
+        <omgdi:waypoint x="2450" y="118" />
+        <omgdi:waypoint x="2522" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
