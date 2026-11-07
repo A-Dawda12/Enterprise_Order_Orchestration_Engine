@@ -145,6 +145,24 @@ public class OrderServiceImpl implements OrderService {
         return new ValidationResult(validItems && validAddress, validItems, validAddress, List.copyOf(errors));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public CheckResult validateOrderItems(String orderId) {
+        OrderEntity order = getOrder(orderId);
+        List<String> errors = new ArrayList<>();
+        boolean valid = validateItems(order.getItems(), errors);
+        return new CheckResult(valid, List.copyOf(errors));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CheckResult validateShippingAddress(String orderId) {
+        OrderEntity order = getOrder(orderId);
+        List<String> errors = new ArrayList<>();
+        boolean valid = validateAddress(order.getShippingAddress(), errors);
+        return new CheckResult(valid, List.copyOf(errors));
+    }
+
     private boolean validateAddress(ShippingAddress address, List<String> errors) {
         if(address == null) {
             errors.add("shippinAddress is required");

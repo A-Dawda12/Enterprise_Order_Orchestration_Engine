@@ -5,9 +5,9 @@ public class HandlerActivityName {
     public static final String PROCESS_ORDER_FULLFILLMENT = "process_order_fulfillment";
 
     //order intake and validation
-    public static final String GET_ORDER_FOR_FULFILLMENT = "getOrderForFulfillment";
-    public static final String VALIDATE_ORDER_ITMES = "validateOrderItems";
-    public static final String VALIDATE_SHIPPING_ORDER = "ValidateShippingOrder";
+    public static final String GET_ORDER_FOR_FULFILLMENT = "GetOrderForFulfillment";
+    public static final String VALIDATE_ORDER_ITMES = "ValidateOrderItems";
+    public static final String VALIDATE_SHIPPING_ORDER = "ValidateShippingAddress";
     public static final String GATEWAY_VALIDATION_RESULT = "GatewayValidationResult";
     public static final String UPDATE_ORDER_STATUS_TO_VALIDATED = "UpdateOrderStatusToValidated";
     public static final String UPDATE_ORDER_STATUS_TO_REJECTED = "UpdateOrderStatusToRejected";
