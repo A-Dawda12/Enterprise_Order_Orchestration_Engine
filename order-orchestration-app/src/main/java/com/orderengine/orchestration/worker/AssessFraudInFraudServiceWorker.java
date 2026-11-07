@@ -7,9 +7,11 @@ import com.orderengine.client.fraud.model.FraudAssessmentResponse;
 import com.orderengine.common.orchestration.ActivityParameters;
 import com.orderengine.common.orchestration.HandlerActivityName;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class AssessFraudInFraudServiceWorker extends AbstractJobWorker {
 
     private final FraudServiceClient fraudServiceClient;
@@ -22,7 +24,7 @@ public class AssessFraudInFraudServiceWorker extends AbstractJobWorker {
 
     @Override
     public String jobType() {
-        return HandlerActivityName.EXTRACT_RESERVATION_ID;
+        return HandlerActivityName.ASSES_FRAUD_IN_FRAUD_SERVICE;
     }
 
     @Override

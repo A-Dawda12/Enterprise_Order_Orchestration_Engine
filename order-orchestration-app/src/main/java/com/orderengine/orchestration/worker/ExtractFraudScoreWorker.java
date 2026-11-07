@@ -3,9 +3,11 @@ package com.orderengine.orchestration.worker;
 import com.orderengine.common.orchestration.ActivityParameters;
 import com.orderengine.common.orchestration.HandlerActivityName;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class ExtractFraudScoreWorker extends  AbstractJobWorker {
 
     private static final String SCORE = "score";

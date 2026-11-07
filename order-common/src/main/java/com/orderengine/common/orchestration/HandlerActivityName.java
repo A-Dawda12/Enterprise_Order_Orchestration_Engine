@@ -21,7 +21,7 @@ public class HandlerActivityName {
     public static final String AUTHORIZE_PAYMENT_IN_PAYMENT_SERVICE = "AuthorizePaymentInPaymentService";
     public static final String EXTRACT_PAYMENT_ID = "ExtractPaymentId";
     public static final String BUILD_FRAUD_ASSESSMENT_REQUEST = "BuildFraudAssessmentRequest";
-    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssesFraudInFraudService";
+    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssessFraudInFraudService";
     public static final String EXTRACT_FRAUD_SCORE = "ExtractFraudScore";
     public static final String GATEWAY_PARALLEL_JOIN = "GatewayParallelJoin";
 

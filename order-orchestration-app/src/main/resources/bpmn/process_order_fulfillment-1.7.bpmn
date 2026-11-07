@@ -33,7 +33,7 @@
         <zeebe:taskDefinition type="UpdateOrderStatusToValidated" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_GatewayToValidated</bpmn:incoming>
-      <bpmn:outgoing>Flow_1loau75</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0pjr1j1</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="UpdateOrderStatusToRejected" name="UpdateOrderStatusToRejected">
       <bpmn:extensionElements>
@@ -60,7 +60,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="BuildReverseInventoryRequest" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1loau75</bpmn:incoming>
+      <bpmn:incoming>Flow_ForkToBuildReserve</bpmn:incoming>
       <bpmn:outgoing>Flow_1op5n5i</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="ReserveInventoryInInventoryService" name="ReserveInventoryInInventoryService">
@@ -75,9 +75,8 @@
         <zeebe:taskDefinition type="ExtractReservationId" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0tf18c9</bpmn:incoming>
-      <bpmn:outgoing>Flow_1miguyr</bpmn:outgoing>
+      <bpmn:outgoing>Flow_19i4ov9</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1loau75" sourceRef="UpdateOrderStatusToValidated" targetRef="BuildReverseInventoryRequest" />
     <bpmn:sequenceFlow id="Flow_1op5n5i" sourceRef="BuildReverseInventoryRequest" targetRef="ReserveInventoryInInventoryService" />
     <bpmn:sequenceFlow id="Flow_0tf18c9" sourceRef="ReserveInventoryInInventoryService" targetRef="ExtractReservationId" />
     <bpmn:serviceTask id="AuthorizePaymentInPaymentService" name="AuthorizePaymentInPaymentService">
@@ -91,7 +90,7 @@
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="BuildAuthorizePaymentRequest" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1miguyr</bpmn:incoming>
+      <bpmn:incoming>Flow_ForkToBuildAuthorize</bpmn:incoming>
       <bpmn:outgoing>Flow_1xb44ya</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="ExtractPaymentId" name="ExtractPaymentId">
@@ -99,19 +98,18 @@
         <zeebe:taskDefinition type="ExtractPaymentId" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1x73g6v</bpmn:incoming>
-      <bpmn:outgoing>Flow_1mllnn6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1jef0vw</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_15n5eqo</bpmn:incoming>
+      <bpmn:incoming>Flow_0an621l</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1miguyr" sourceRef="ExtractReservationId" targetRef="BuildAuthorizePaymentRequest" />
     <bpmn:sequenceFlow id="Flow_1xb44ya" sourceRef="BuildAuthorizePaymentRequest" targetRef="AuthorizePaymentInPaymentService" />
     <bpmn:sequenceFlow id="Flow_1x73g6v" sourceRef="AuthorizePaymentInPaymentService" targetRef="ExtractPaymentId" />
     <bpmn:serviceTask id="BuildFraudAssessmentRequest" name="BuildFraudAssessmentRequest">
       <bpmn:extensionElements>
         <zeebe:taskDefinition type="BuildFraudAssessmentRequest" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1mllnn6</bpmn:incoming>
+      <bpmn:incoming>Flow_FlowToBuildFraud</bpmn:incoming>
       <bpmn:outgoing>Flow_0yyjs8r</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="AssessFraudInFraudService" name="AssessFraudInFraudService">
@@ -126,166 +124,225 @@
         <zeebe:taskDefinition type="ExtractFraudScore" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_09g5ajd</bpmn:incoming>
-      <bpmn:outgoing>Flow_15n5eqo</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0mlbinn</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1mllnn6" sourceRef="ExtractPaymentId" targetRef="BuildFraudAssessmentRequest" />
     <bpmn:sequenceFlow id="Flow_0yyjs8r" sourceRef="BuildFraudAssessmentRequest" targetRef="AssessFraudInFraudService" />
     <bpmn:sequenceFlow id="Flow_09g5ajd" sourceRef="AssessFraudInFraudService" targetRef="ExtractFraudScore" />
-    <bpmn:sequenceFlow id="Flow_15n5eqo" sourceRef="ExtractFraudScore" targetRef="EndEvent_Complete" />
+    <bpmn:parallelGateway id="Gateway_ParallelFork" name="Gateway_ParallelFork">
+      <bpmn:incoming>Flow_0pjr1j1</bpmn:incoming>
+      <bpmn:outgoing>Flow_ForkToBuildReserve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ForkToBuildAuthorize</bpmn:outgoing>
+      <bpmn:outgoing>Flow_FlowToBuildFraud</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_ForkToBuildReserve" name="inventory" sourceRef="Gateway_ParallelFork" targetRef="BuildReverseInventoryRequest" />
+    <bpmn:sequenceFlow id="Flow_0pjr1j1" sourceRef="UpdateOrderStatusToValidated" targetRef="Gateway_ParallelFork" />
+    <bpmn:sequenceFlow id="Flow_ForkToBuildAuthorize" name="payment" sourceRef="Gateway_ParallelFork" targetRef="BuildAuthorizePaymentRequest" />
+    <bpmn:sequenceFlow id="Flow_FlowToBuildFraud" name="fraud" sourceRef="Gateway_ParallelFork" targetRef="BuildFraudAssessmentRequest" />
+    <bpmn:parallelGateway id="Gateway_ParallelJoin" name="Gateway_ParallelJoin">
+      <bpmn:incoming>Flow_19i4ov9</bpmn:incoming>
+      <bpmn:incoming>Flow_1jef0vw</bpmn:incoming>
+      <bpmn:incoming>Flow_0mlbinn</bpmn:incoming>
+      <bpmn:outgoing>Flow_0an621l</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_19i4ov9" sourceRef="ExtractReservationId" targetRef="Gateway_ParallelJoin" />
+    <bpmn:sequenceFlow id="Flow_1jef0vw" sourceRef="ExtractPaymentId" targetRef="Gateway_ParallelJoin" />
+    <bpmn:sequenceFlow id="Flow_0mlbinn" sourceRef="ExtractFraudScore" targetRef="Gateway_ParallelJoin" />
+    <bpmn:sequenceFlow id="Flow_0an621l" sourceRef="Gateway_ParallelJoin" targetRef="EndEvent_Complete" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
       <bpmndi:BPMNShape id="StartEvent_OrderReceived_di" bpmnElement="StartEvent_OrderReceived">
-        <omgdc:Bounds x="162" y="100" width="36" height="36" />
+        <omgdc:Bounds x="162" y="290" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="141" y="136" width="78" height="14" />
+          <omgdc:Bounds x="141" y="326" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="GetOrderForFulfillment_di" bpmnElement="GetOrderForFulfillment">
-        <omgdc:Bounds x="260" y="78" width="100" height="80" />
+        <omgdc:Bounds x="260" y="268" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1k8mkl5" bpmnElement="ValidateOrderItems">
-        <omgdc:Bounds x="400" y="78" width="100" height="80" />
+        <omgdc:Bounds x="400" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_06c9pcn" bpmnElement="ValidateShippingAddress">
-        <omgdc:Bounds x="540" y="78" width="100" height="80" />
+        <omgdc:Bounds x="540" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1tkl8y3" bpmnElement="UpdateOrderStatusToValidated">
-        <omgdc:Bounds x="830" y="78" width="100" height="80" />
+        <omgdc:Bounds x="830" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1lihiwh" bpmnElement="UpdateOrderStatusToRejected">
-        <omgdc:Bounds x="660" y="210" width="100" height="80" />
+        <omgdc:Bounds x="660" y="400" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1380gy3_di" bpmnElement="EndEvent_Rejected">
-        <omgdc:Bounds x="692" y="362" width="36" height="36" />
+        <omgdc:Bounds x="692" y="552" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="688" y="405" width="44" height="14" />
+          <omgdc:Bounds x="688" y="595" width="44" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1yyigds_di" bpmnElement="Gateway_ValidationResult" isMarkerVisible="true">
-        <omgdc:Bounds x="685" y="93" width="50" height="50" />
+        <omgdc:Bounds x="685" y="283" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="695" y="69" width="30" height="14" />
+          <omgdc:Bounds x="695" y="259" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
-        <omgdc:Bounds x="1000" y="78" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNShape id="Gateway_00aqdv3_di" bpmnElement="Gateway_ParallelFork">
+        <omgdc:Bounds x="985" y="283" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="966" y="343" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
-        <omgdc:Bounds x="1180" y="78" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
-        <omgdc:Bounds x="1350" y="78" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
-        <omgdc:Bounds x="1670" y="78" width="100" height="80" />
-        <bpmndi:BPMNLabel />
+      <bpmndi:BPMNShape id="BPMNShape_101akz0" bpmnElement="Gateway_ParallelJoin">
+        <omgdc:Bounds x="1755" y="283" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1786" y="246" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
-        <omgdc:Bounds x="1510" y="78" width="100" height="80" />
+        <omgdc:Bounds x="1140" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
-        <omgdc:Bounds x="1840" y="78" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
+        <omgdc:Bounds x="1140" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1yyap1m" bpmnElement="BuildFraudAssessmentRequest">
-        <omgdc:Bounds x="2000" y="78" width="100" height="80" />
+        <omgdc:Bounds x="1140" y="450" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="2522" y="100" width="36" height="36" />
+        <omgdc:Bounds x="1952" y="290" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2516" y="76" width="48" height="14" />
+          <omgdc:Bounds x="1946" y="266" width="48" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
-        <omgdc:Bounds x="2170" y="78" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
-        <omgdc:Bounds x="2350" y="78" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
+        <omgdc:Bounds x="1540" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
+        <omgdc:Bounds x="1540" y="450" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
+        <omgdc:Bounds x="1540" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
+        <omgdc:Bounds x="1350" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
+        <omgdc:Bounds x="1350" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
+        <omgdc:Bounds x="1350" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
-        <omgdi:waypoint x="198" y="118" />
-        <omgdi:waypoint x="260" y="118" />
+        <omgdi:waypoint x="198" y="308" />
+        <omgdi:waypoint x="260" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0hekur2_di" bpmnElement="Flow_0hekur2">
-        <omgdi:waypoint x="360" y="118" />
-        <omgdi:waypoint x="400" y="118" />
+        <omgdi:waypoint x="360" y="308" />
+        <omgdi:waypoint x="400" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_07bh6wb_di" bpmnElement="Flow_07bh6wb">
-        <omgdi:waypoint x="500" y="118" />
-        <omgdi:waypoint x="540" y="118" />
+        <omgdi:waypoint x="500" y="308" />
+        <omgdi:waypoint x="540" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0rms0qo_di" bpmnElement="Flow_0rms0qo">
-        <omgdi:waypoint x="710" y="290" />
-        <omgdi:waypoint x="710" y="362" />
+        <omgdi:waypoint x="710" y="480" />
+        <omgdi:waypoint x="710" y="552" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0gkz6ue_di" bpmnElement="Flow_0gkz6ue">
-        <omgdi:waypoint x="640" y="118" />
-        <omgdi:waypoint x="685" y="118" />
+        <omgdi:waypoint x="640" y="308" />
+        <omgdi:waypoint x="685" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0plt5p0_di" bpmnElement="Flow_GatewayToValidated">
-        <omgdi:waypoint x="735" y="118" />
-        <omgdi:waypoint x="830" y="118" />
+        <omgdi:waypoint x="735" y="308" />
+        <omgdi:waypoint x="830" y="308" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="771" y="100" width="23" height="14" />
+          <omgdc:Bounds x="771" y="290" width="23" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1j4wjvr_di" bpmnElement="Flow_GatewayToRejected">
-        <omgdi:waypoint x="710" y="143" />
-        <omgdi:waypoint x="710" y="210" />
+        <omgdi:waypoint x="710" y="333" />
+        <omgdi:waypoint x="710" y="400" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="724" y="184" width="32" height="14" />
+          <omgdc:Bounds x="724" y="374" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1loau75_di" bpmnElement="Flow_1loau75">
-        <omgdi:waypoint x="930" y="118" />
-        <omgdi:waypoint x="1000" y="118" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1op5n5i_di" bpmnElement="Flow_1op5n5i">
-        <omgdi:waypoint x="1100" y="118" />
-        <omgdi:waypoint x="1180" y="118" />
+        <omgdi:waypoint x="1240" y="120" />
+        <omgdi:waypoint x="1350" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0tf18c9_di" bpmnElement="Flow_0tf18c9">
-        <omgdi:waypoint x="1280" y="118" />
-        <omgdi:waypoint x="1350" y="118" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1miguyr_di" bpmnElement="Flow_1miguyr">
-        <omgdi:waypoint x="1450" y="118" />
-        <omgdi:waypoint x="1510" y="118" />
+        <omgdi:waypoint x="1450" y="120" />
+        <omgdi:waypoint x="1540" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xb44ya_di" bpmnElement="Flow_1xb44ya">
-        <omgdi:waypoint x="1610" y="118" />
-        <omgdi:waypoint x="1670" y="118" />
+        <omgdi:waypoint x="1240" y="308" />
+        <omgdi:waypoint x="1350" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x73g6v_di" bpmnElement="Flow_1x73g6v">
-        <omgdi:waypoint x="1770" y="118" />
-        <omgdi:waypoint x="1840" y="118" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1mllnn6_di" bpmnElement="Flow_1mllnn6">
-        <omgdi:waypoint x="1940" y="118" />
-        <omgdi:waypoint x="2000" y="118" />
+        <omgdi:waypoint x="1450" y="308" />
+        <omgdi:waypoint x="1540" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0yyjs8r_di" bpmnElement="Flow_0yyjs8r">
-        <omgdi:waypoint x="2100" y="118" />
-        <omgdi:waypoint x="2170" y="118" />
+        <omgdi:waypoint x="1240" y="490" />
+        <omgdi:waypoint x="1350" y="490" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_09g5ajd_di" bpmnElement="Flow_09g5ajd">
-        <omgdi:waypoint x="2270" y="118" />
-        <omgdi:waypoint x="2350" y="118" />
+        <omgdi:waypoint x="1450" y="490" />
+        <omgdi:waypoint x="1540" y="490" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_15n5eqo_di" bpmnElement="Flow_15n5eqo">
-        <omgdi:waypoint x="2450" y="118" />
-        <omgdi:waypoint x="2522" y="118" />
+      <bpmndi:BPMNEdge id="Flow_05ynxfv_di" bpmnElement="Flow_ForkToBuildReserve">
+        <omgdi:waypoint x="1010" y="283" />
+        <omgdi:waypoint x="1010" y="120" />
+        <omgdi:waypoint x="1140" y="120" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1003" y="198.5" width="45" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pjr1j1_di" bpmnElement="Flow_0pjr1j1">
+        <omgdi:waypoint x="930" y="308" />
+        <omgdi:waypoint x="985" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1tv5ei3_di" bpmnElement="Flow_ForkToBuildAuthorize">
+        <omgdi:waypoint x="1035" y="308" />
+        <omgdi:waypoint x="1140" y="308" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1067" y="290" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04sowxz_di" bpmnElement="Flow_FlowToBuildFraud">
+        <omgdi:waypoint x="1010" y="333" />
+        <omgdi:waypoint x="1010" y="490" />
+        <omgdi:waypoint x="1140" y="490" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1012" y="410" width="26" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19i4ov9_di" bpmnElement="Flow_19i4ov9">
+        <omgdi:waypoint x="1640" y="120" />
+        <omgdi:waypoint x="1780" y="120" />
+        <omgdi:waypoint x="1780" y="283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jef0vw_di" bpmnElement="Flow_1jef0vw">
+        <omgdi:waypoint x="1640" y="308" />
+        <omgdi:waypoint x="1755" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mlbinn_di" bpmnElement="Flow_0mlbinn">
+        <omgdi:waypoint x="1640" y="490" />
+        <omgdi:waypoint x="1780" y="490" />
+        <omgdi:waypoint x="1780" y="333" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0an621l_di" bpmnElement="Flow_0an621l">
+        <omgdi:waypoint x="1805" y="308" />
+        <omgdi:waypoint x="1952" y="308" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
