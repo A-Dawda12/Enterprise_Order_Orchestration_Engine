@@ -40,6 +40,8 @@ public class HandlerActivityName {
 // §4.4 Payment Capture & Shipping Activities
 // ==========================================================
 
+    public static final String UPDATE_ORDER_STATUS_TO_PROCESSING = "UpdateOrderStatusToProcessing";
+    public static final String UPDATE_ORDER_STATUS_TO_PAYMENT_PENDING = "UpdateOrderStatusToPaymentPending";
     public static final String CAPTURE_PAYMENT_IN_PAYMENT_SERVICE = "CapturePaymentInPaymentService";
     public static final String UPDATE_ORDER_STATUS_TO_PAID = "UpdateOrderStatusToPaid";
     public static final String BUILD_CREATE_SHIPMENT_REQUEST = "BuildCreateShipmentRequest";
