@@ -5,9 +5,9 @@ public class HandlerActivityName {
     public static final String PROCESS_ORDER_FULLFILLMENT = "process_order_fulfillment";
 
     //order intake and validation
-    public static final String GET_ORDER_FOR_FULFILLMENT = "getOrderForFulfillment";
-    public static final String VALIDATE_ORDER_ITMES = "validateOrderItems";
-    public static final String VALIDATE_SHIPPING_ORDER = "ValidateShippingOrder";
+    public static final String GET_ORDER_FOR_FULFILLMENT = "GetOrderForFulfillment";
+    public static final String VALIDATE_ORDER_ITMES = "ValidateOrderItems";
+    public static final String VALIDATE_SHIPPING_ORDER = "ValidateShippingAddress";
     public static final String GATEWAY_VALIDATION_RESULT = "GatewayValidationResult";
     public static final String UPDATE_ORDER_STATUS_TO_VALIDATED = "UpdateOrderStatusToValidated";
     public static final String UPDATE_ORDER_STATUS_TO_REJECTED = "UpdateOrderStatusToRejected";
@@ -15,13 +15,13 @@ public class HandlerActivityName {
     //Parallel fulfillment fork
     public static final String GATEWAY_PARALLEL_FORK = "GatewayParallelFork";
     public static final String BUILD_REVERSE_INVENTORY_REQUEST = "BuildReverseInventoryRequest";
-    public static final String REVERSE_INVENTORY_IN_INVENTORY_SERVICE = "ReverseInventoryInInventoryService";
+    public static final String RESERVE_INVENTORY_IN_INVENTORY_SERVICE = "ReserveInventoryInInventoryService";
     public static final String EXTRACT_RESERVATION_ID = "ExtractReservationId";
     public static final String BUILD_AUTHORIZE_PAYMENT_REQUEST = "BuildAuthorizePaymentRequest";
     public static final String AUTHORIZE_PAYMENT_IN_PAYMENT_SERVICE = "AuthorizePaymentInPaymentService";
     public static final String EXTRACT_PAYMENT_ID = "ExtractPaymentId";
     public static final String BUILD_FRAUD_ASSESSMENT_REQUEST = "BuildFraudAssessmentRequest";
-    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssesFraudInFraudService";
+    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssessFraudInFraudService";
     public static final String EXTRACT_FRAUD_SCORE = "ExtractFraudScore";
     public static final String GATEWAY_PARALLEL_JOIN = "GatewayParallelJoin";
 

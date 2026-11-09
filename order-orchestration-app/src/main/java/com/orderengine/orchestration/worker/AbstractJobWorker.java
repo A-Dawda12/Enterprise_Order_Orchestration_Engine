@@ -7,7 +7,9 @@ import io.camunda.zeebe.client.api.worker.JobHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public abstract class AbstractJobWorker implements JobHandler {
@@ -15,6 +17,10 @@ public abstract class AbstractJobWorker implements JobHandler {
     public abstract String jobType();
 
     protected abstract Map<String, Object> execute(ActivatedJob job);
+
+    protected static UUID idempotencyKey(ActivatedJob job) {
+        return UUID.nameUUIDFromBytes(String.valueOf(job.getKey()).getBytes(StandardCharsets.UTF_8));
+    }
 
     @Override
     public final void handle(JobClient client, ActivatedJob job) {
@@ -26,11 +32,12 @@ public abstract class AbstractJobWorker implements JobHandler {
         log.info("JOB IN activity={} orderId={}", job.getType(), orderId);
         try{
             Map<String, Object> outputVariables = execute(job);
+            Map<String, Object> output = outputVariables == null ? Map.of() : outputVariables;
             client.newCompleteCommand(job.getKey())
-                    .variables(outputVariables == null ? Map.of() : outputVariables)
+                    .variables(output)
                     .send()
                     .join();
-            log.info("JOB OUT activity={} orderId={} durationMs={}", job.getType(), orderId, System.currentTimeMillis() - startAt);
+            log.info("JOB OUT activity={} orderId={} durationMs={} output={}", job.getType(), orderId, System.currentTimeMillis() - startAt, output);
         }catch (Exception ex) {
             log.error("JOB OUT activity={} orderId={} status=FAILED durationMs={} reason={}",
                     job.getType(), orderId, System.currentTimeMillis() - startAt, ex.getMessage(), ex);

@@ -65,6 +65,7 @@ paths:
       tags:
         - Orders
       summary: Create order
+      description: Creates an order in CREATED status and starts process_order_fulfillment.
       operationId: createOrder
       parameters:
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -124,6 +125,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationResultResponse"
+
+  /v1/orders/{orderId}/validate/items:
+    post:
+      tags:
+        - Orders
+      summary: Validate order items
+      operationId: validateOrderItems
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+
+      responses:
+        "200":
+          description: Item Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckResultResponse"
+  /v1/orders/{orderId}/validate/address:
+    post:
+      tags:
+        - Orders
+      summary: Validate shipping address
+      operationId: validateShippingAddress
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+
+      responses:
+        "200":
+          description: Address Validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckResultResponse"
 
   /v1/orders/{orderId}/invoice:
     post:
@@ -353,6 +389,17 @@ components:
           type: boolean
 
         validAddress:
+          type: boolean
+
+        errors:
+          type: array
+          items:
+            type: string
+
+    CheckResultResponse:
+      type: object
+      properties:
+        valid:
           type: boolean
 
         errors:

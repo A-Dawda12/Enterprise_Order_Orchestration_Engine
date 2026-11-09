@@ -25,6 +25,10 @@ public interface OrderService {
 
     ValidationResult validateOrder(String orderId);
 
+    CheckResult validateOrderItems(String orderId);
+
+    CheckResult validateShippingAddress(String orderId);
+
     InvoiceEntity generateInvoice(String orderId, String paymentId);
 
     OrderEntity updateStatus(String orderId, OrderStatus status, String reason);
@@ -38,4 +42,6 @@ public interface OrderService {
     }
 
     record NewOrderItem(String sku, int quantity, BigDecimal unitPrice) {}
+
+    record CheckResult(boolean valid, List<String> errors) {}
 }

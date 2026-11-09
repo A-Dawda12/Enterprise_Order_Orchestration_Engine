@@ -1,14 +1,7 @@
 package com.orderengine.client.order;
 
 import com.orderengine.client.order.api.OrdersApi;
-import com.orderengine.client.order.model.CreateOrderRequest;
-import com.orderengine.client.order.model.InvoiceRequest;
-import com.orderengine.client.order.model.InvoiceResponse;
-import com.orderengine.client.order.model.OrderResponse;
-import com.orderengine.client.order.model.OrderStatus;
-import com.orderengine.client.order.model.PageOrderResponse;
-import com.orderengine.client.order.model.StatusUpdateRequest;
-import com.orderengine.client.order.model.ValidationResultResponse;
+import com.orderengine.client.order.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -45,4 +38,13 @@ public class OrderServiceClient {
     public ValidationResultResponse validateOrder(UUID orderId, UUID idempotencyKey) {
         return ordersApi.validateOrder(orderId, idempotencyKey);
     }
+
+    public CheckResultResponse validateOrderItems(UUID orderId, UUID idempotencyKey) {
+        return ordersApi.validateOrderItems(orderId, idempotencyKey);
+    }
+
+    public CheckResultResponse validateShippingAddress(UUID orderId, UUID idempotencyKey) {
+        return ordersApi.validateShippingAddress(orderId, idempotencyKey);
+    }
+
 }
