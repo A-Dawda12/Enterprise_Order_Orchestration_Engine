@@ -4,9 +4,10 @@ public final class ActivityParameters {
 
     public static final String ORDER_ID = "orderId";
     public static final String ORDER = "order";
-    public static final String VALID_ITEMS = "validItemS";
+    public static final String VALID_ITEMS = "validItems";
     public static final String VALID_ADDRESS = "validAddress";
     public static final String VALIDATION_ERRORS = "validationErrors";
+    public static final String RESERVE_REQUEST = "reserveRequest";
     public static final String RESERVATION_ID = "reservationId";
     public static final String RESERVATION = "reservation";
     public static final String PAYMENT_ID = "paymentId";

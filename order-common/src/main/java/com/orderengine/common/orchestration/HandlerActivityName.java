@@ -15,7 +15,7 @@ public class HandlerActivityName {
     //Parallel fulfillment fork
     public static final String GATEWAY_PARALLEL_FORK = "GatewayParallelFork";
     public static final String BUILD_REVERSE_INVENTORY_REQUEST = "BuildReverseInventoryRequest";
-    public static final String REVERSE_INVENTORY_IN_INVENTORY_SERVICE = "ReverseInventoryInInventoryService";
+    public static final String RESERVE_INVENTORY_IN_INVENTORY_SERVICE = "ReserveInventoryInInventoryService";
     public static final String EXTRACT_RESERVATION_ID = "ExtractReservationId";
     public static final String BUILD_AUTHORIZE_PAYMENT_REQUEST = "BuildAuthorizePaymentRequest";
     public static final String AUTHORIZE_PAYMENT_IN_PAYMENT_SERVICE = "AuthorizePaymentInPaymentService";
