@@ -4,6 +4,7 @@ import com.orderengine.common.error.ErrorCode;
 import com.orderengine.common.error.OrderEngineException;
 import com.orderengine.order.client.orchestration.OrchestrationClient;
 import com.orderengine.order.client.orchestration.WorkflowInstanceResponse;
+import com.orderengine.order.client.paymentmethod.PaymentMethodTokenProvider;
 import com.orderengine.order.domain.*;
 import com.orderengine.order.repository.InvoiceRepository;
 import com.orderengine.order.repository.OrderEventRepository;
@@ -29,17 +30,20 @@ public class OrderServiceImpl implements OrderService {
     private final OrderEventRepository orderEventRepository;
     private final InvoiceRepository invoiceRepository;
     private final OrchestrationClient orchestrationClient;
+    private final PaymentMethodTokenProvider paymentMethodTokenProvider;
     private final TransactionTemplate transcationTemplate;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderEventRepository orderEventRepository,
                             InvoiceRepository invoiceRepository,
                             OrchestrationClient orchestrationClient,
+                            PaymentMethodTokenProvider paymentMethodTokenProvider,
                             PlatformTransactionManager transactionManager) {
         this.orderRepository = orderRepository;
         this.orderEventRepository = orderEventRepository;
         this.invoiceRepository = invoiceRepository;
         this.orchestrationClient = orchestrationClient;
+        this.paymentMethodTokenProvider = paymentMethodTokenProvider;
         this.transcationTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -58,8 +62,9 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderEngineException(ErrorCode.INTERNAL_ERROR, "Failed to create order");
         }
 
+        String paymentMethodToken = paymentMethodTokenProvider.issueToken(saved.getOrderId(), customerId);
         WorkflowInstanceResponse instance = orchestrationClient.startOrderFulfillment(
-                UUID.fromString(saved.getOrderId())
+                UUID.fromString(saved.getOrderId()), paymentMethodToken
         );
 
         transcationTemplate.executeWithoutResult(status -> attachWorkflowKey(saved, instance.instanceKey()));

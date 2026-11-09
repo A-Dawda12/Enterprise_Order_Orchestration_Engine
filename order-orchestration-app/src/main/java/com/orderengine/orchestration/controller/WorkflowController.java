@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -29,7 +30,9 @@ public class WorkflowController {
 
     @PostMapping("/processes/order-fulfillment/start")
     ResponseEntity<WorkflowInstanceResponse> start(@Valid @RequestBody StartWorkflowRequest request) {
-        Map<String, Object> variables = Map.of(ActivityParameters.ORDER_ID, request.orderId().toString());
+        Map<String, Object> variables = new HashMap<>();
+        variables.put(ActivityParameters.ORDER_ID, request.orderId().toString());
+        variables.put(ActivityParameters.PAYMENT_METHOD_TOKEN, request.paymentMethodToken());
 
         ProcessInstanceEvent instance = zeebeClient.newCreateInstanceCommand()
                 .bpmnProcessId(HandlerActivityName.PROCESS_ORDER_FULLFILLMENT)
