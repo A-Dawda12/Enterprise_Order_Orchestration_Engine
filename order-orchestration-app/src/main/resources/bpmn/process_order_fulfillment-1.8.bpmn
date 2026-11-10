@@ -101,7 +101,7 @@
       <bpmn:outgoing>Flow_1jef0vw</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_0an621l</bpmn:incoming>
+      <bpmn:incoming>Flow_16hoqro</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1xb44ya" sourceRef="BuildAuthorizePaymentRequest" targetRef="AuthorizePaymentInPaymentService" />
     <bpmn:sequenceFlow id="Flow_1x73g6v" sourceRef="AuthorizePaymentInPaymentService" targetRef="ExtractPaymentId" />
@@ -142,12 +142,44 @@
       <bpmn:incoming>Flow_19i4ov9</bpmn:incoming>
       <bpmn:incoming>Flow_1jef0vw</bpmn:incoming>
       <bpmn:incoming>Flow_0mlbinn</bpmn:incoming>
-      <bpmn:outgoing>Flow_0an621l</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1x55iac</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_19i4ov9" sourceRef="ExtractReservationId" targetRef="Gateway_ParallelJoin" />
     <bpmn:sequenceFlow id="Flow_1jef0vw" sourceRef="ExtractPaymentId" targetRef="Gateway_ParallelJoin" />
     <bpmn:sequenceFlow id="Flow_0mlbinn" sourceRef="ExtractFraudScore" targetRef="Gateway_ParallelJoin" />
-    <bpmn:sequenceFlow id="Flow_0an621l" sourceRef="Gateway_ParallelJoin" targetRef="EndEvent_Complete" />
+    <bpmn:serviceTask id="UpdateOrderStatusToPaymentPending" name="UpdateOrderStatusToPaymentPending">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToPaymentPending" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_18jdijl</bpmn:incoming>
+      <bpmn:outgoing>Flow_1syzi3d</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="UpdateOrderStatusToPaid" name="UpdateOrderStatusToPaid">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToPaid" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1wz0v44</bpmn:incoming>
+      <bpmn:outgoing>Flow_16hoqro</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="CapturePaymentInPaymentService" name="CapturePaymentInPaymentService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="CapturePaymentInPaymentService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1syzi3d</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wz0v44</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="UpdateOrderStatusToProcessing" name="UpdateOrderStatusToProcessing">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToProcessing" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1x55iac</bpmn:incoming>
+      <bpmn:outgoing>Flow_18jdijl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1x55iac" sourceRef="Gateway_ParallelJoin" targetRef="UpdateOrderStatusToProcessing" />
+    <bpmn:sequenceFlow id="Flow_18jdijl" sourceRef="UpdateOrderStatusToProcessing" targetRef="UpdateOrderStatusToPaymentPending" />
+    <bpmn:sequenceFlow id="Flow_1syzi3d" sourceRef="UpdateOrderStatusToPaymentPending" targetRef="CapturePaymentInPaymentService" />
+    <bpmn:sequenceFlow id="Flow_1wz0v44" sourceRef="CapturePaymentInPaymentService" targetRef="UpdateOrderStatusToPaid" />
+    <bpmn:sequenceFlow id="Flow_16hoqro" sourceRef="UpdateOrderStatusToPaid" targetRef="EndEvent_Complete" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -188,6 +220,41 @@
           <omgdc:Bounds x="695" y="259" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
+        <omgdc:Bounds x="1140" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
+        <omgdc:Bounds x="1350" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
+        <omgdc:Bounds x="1540" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
+        <omgdc:Bounds x="1350" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
+        <omgdc:Bounds x="1140" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
+        <omgdc:Bounds x="1540" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1yyap1m" bpmnElement="BuildFraudAssessmentRequest">
+        <omgdc:Bounds x="1140" y="450" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
+        <omgdc:Bounds x="1350" y="450" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
+        <omgdc:Bounds x="1540" y="450" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_00aqdv3_di" bpmnElement="Gateway_ParallelFork">
         <omgdc:Bounds x="985" y="283" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -200,46 +267,27 @@
           <omgdc:Bounds x="1786" y="246" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
-        <omgdc:Bounds x="1140" y="268" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_01d96lp" bpmnElement="UpdateOrderStatusToProcessing">
+        <omgdc:Bounds x="1910" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
-        <omgdc:Bounds x="1140" y="80" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_14u6mxq" bpmnElement="UpdateOrderStatusToPaymentPending">
+        <omgdc:Bounds x="2100" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1yyap1m" bpmnElement="BuildFraudAssessmentRequest">
-        <omgdc:Bounds x="1140" y="450" width="100" height="80" />
+      <bpmndi:BPMNShape id="BPMNShape_1h5kf2k" bpmnElement="CapturePaymentInPaymentService">
+        <omgdc:Bounds x="2300" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1duo555" bpmnElement="UpdateOrderStatusToPaid">
+        <omgdc:Bounds x="2480" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="1952" y="290" width="36" height="36" />
+        <omgdc:Bounds x="2662" y="290" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1946" y="266" width="48" height="14" />
+          <omgdc:Bounds x="2656" y="266" width="48" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
-        <omgdc:Bounds x="1540" y="268" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
-        <omgdc:Bounds x="1540" y="450" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
-        <omgdc:Bounds x="1540" y="80" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
-        <omgdc:Bounds x="1350" y="80" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
-        <omgdc:Bounds x="1350" y="268" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
-        <omgdc:Bounds x="1350" y="450" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
         <omgdi:waypoint x="198" y="308" />
@@ -340,9 +388,25 @@
         <omgdi:waypoint x="1780" y="490" />
         <omgdi:waypoint x="1780" y="333" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0an621l_di" bpmnElement="Flow_0an621l">
+      <bpmndi:BPMNEdge id="Flow_1x55iac_di" bpmnElement="Flow_1x55iac">
         <omgdi:waypoint x="1805" y="308" />
-        <omgdi:waypoint x="1952" y="308" />
+        <omgdi:waypoint x="1910" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18jdijl_di" bpmnElement="Flow_18jdijl">
+        <omgdi:waypoint x="2010" y="308" />
+        <omgdi:waypoint x="2100" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1syzi3d_di" bpmnElement="Flow_1syzi3d">
+        <omgdi:waypoint x="2200" y="308" />
+        <omgdi:waypoint x="2300" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wz0v44_di" bpmnElement="Flow_1wz0v44">
+        <omgdi:waypoint x="2400" y="308" />
+        <omgdi:waypoint x="2480" y="308" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16hoqro_di" bpmnElement="Flow_16hoqro">
+        <omgdi:waypoint x="2580" y="308" />
+        <omgdi:waypoint x="2662" y="308" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
