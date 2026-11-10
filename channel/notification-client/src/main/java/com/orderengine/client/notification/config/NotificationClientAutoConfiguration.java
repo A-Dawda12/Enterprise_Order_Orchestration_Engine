@@ -35,9 +35,9 @@ public class NotificationClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    NotificationsApi notificationsApi(RestClient paymentServiceRestClient) {
+    NotificationsApi notificationsApi(RestClient notificationServiceRestClient) {
         return DomainServiceRestClients.proxy(
-                paymentServiceRestClient,
+                notificationServiceRestClient,
                 NotificationsApi.class
         );
     }

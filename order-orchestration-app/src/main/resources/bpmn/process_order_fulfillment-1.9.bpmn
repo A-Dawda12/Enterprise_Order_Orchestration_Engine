@@ -100,9 +100,6 @@
       <bpmn:incoming>Flow_1x73g6v</bpmn:incoming>
       <bpmn:outgoing>Flow_1jef0vw</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
-      <bpmn:incoming>Flow_16hoqro</bpmn:incoming>
-    </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1xb44ya" sourceRef="BuildAuthorizePaymentRequest" targetRef="AuthorizePaymentInPaymentService" />
     <bpmn:sequenceFlow id="Flow_1x73g6v" sourceRef="AuthorizePaymentInPaymentService" targetRef="ExtractPaymentId" />
     <bpmn:serviceTask id="BuildFraudAssessmentRequest" name="BuildFraudAssessmentRequest">
@@ -159,7 +156,7 @@
         <zeebe:taskDefinition type="UpdateOrderStatusToPaid" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1wz0v44</bpmn:incoming>
-      <bpmn:outgoing>Flow_16hoqro</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0ft46rr</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="CapturePaymentInPaymentService" name="CapturePaymentInPaymentService">
       <bpmn:extensionElements>
@@ -179,7 +176,74 @@
     <bpmn:sequenceFlow id="Flow_18jdijl" sourceRef="UpdateOrderStatusToProcessing" targetRef="UpdateOrderStatusToPaymentPending" />
     <bpmn:sequenceFlow id="Flow_1syzi3d" sourceRef="UpdateOrderStatusToPaymentPending" targetRef="CapturePaymentInPaymentService" />
     <bpmn:sequenceFlow id="Flow_1wz0v44" sourceRef="CapturePaymentInPaymentService" targetRef="UpdateOrderStatusToPaid" />
-    <bpmn:sequenceFlow id="Flow_16hoqro" sourceRef="UpdateOrderStatusToPaid" targetRef="EndEvent_Complete" />
+    <bpmn:serviceTask id="BuildCreateShipmentRequest" name="BuildCreateShipmentRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildCreateShipmentRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ft46rr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rg1d97</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="SendOrderShippedNotification" name="SendOrderShippedNotification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="SendOrderShippedNotification" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jowsc5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mz64j9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="CreateShipmentInShippingService" name="CreateShipmentInShippingService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="CreateShipmentInShippingService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1rg1d97</bpmn:incoming>
+      <bpmn:outgoing>Flow_02m35dy</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="UpdateOrderStatusToShipped" name="UpdateOrderStatusToShipped">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToShipped" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1givy57</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wbvisc</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="BuildOrderShippedNotificationRequest" name="BuildOrderShippedNotificationRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildOrderShippedNotificationRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1wbvisc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jowsc5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="GenerateInvoiceInOrderService" name="GenerateInvoiceInOrderService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="GenerateInvoiceInOrderService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1mz64j9</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mf9h3c</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="UpdateOrderStatusToCompleted" name="UpdateOrderStatusToCompleted">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToCompleted" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1mf9h3c</bpmn:incoming>
+      <bpmn:outgoing>Flow_1njb9pl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_Complete" name="Complete">
+      <bpmn:incoming>Flow_1njb9pl</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0ft46rr" sourceRef="UpdateOrderStatusToPaid" targetRef="BuildCreateShipmentRequest" />
+    <bpmn:sequenceFlow id="Flow_1rg1d97" sourceRef="BuildCreateShipmentRequest" targetRef="CreateShipmentInShippingService" />
+    <bpmn:sequenceFlow id="Flow_02m35dy" sourceRef="CreateShipmentInShippingService" targetRef="ExtractShipmentId" />
+    <bpmn:sequenceFlow id="Flow_1wbvisc" sourceRef="UpdateOrderStatusToShipped" targetRef="BuildOrderShippedNotificationRequest" />
+    <bpmn:sequenceFlow id="Flow_0jowsc5" sourceRef="BuildOrderShippedNotificationRequest" targetRef="SendOrderShippedNotification" />
+    <bpmn:sequenceFlow id="Flow_1mz64j9" sourceRef="SendOrderShippedNotification" targetRef="GenerateInvoiceInOrderService" />
+    <bpmn:sequenceFlow id="Flow_1mf9h3c" sourceRef="GenerateInvoiceInOrderService" targetRef="UpdateOrderStatusToCompleted" />
+    <bpmn:sequenceFlow id="Flow_1njb9pl" sourceRef="UpdateOrderStatusToCompleted" targetRef="EndEvent_Complete" />
+    <bpmn:serviceTask id="ExtractShipmentId" name="ExtractShipmentId">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ExtractShipmentId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_02m35dy</bpmn:incoming>
+      <bpmn:outgoing>Flow_1givy57</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1givy57" sourceRef="ExtractShipmentId" targetRef="UpdateOrderStatusToShipped" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -267,27 +331,59 @@
           <omgdc:Bounds x="1786" y="246" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_01d96lp" bpmnElement="UpdateOrderStatusToProcessing">
-        <omgdc:Bounds x="1910" y="268" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_14u6mxq" bpmnElement="UpdateOrderStatusToPaymentPending">
         <omgdc:Bounds x="2100" y="268" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1h5kf2k" bpmnElement="CapturePaymentInPaymentService">
-        <omgdc:Bounds x="2300" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1duo555" bpmnElement="UpdateOrderStatusToPaid">
         <omgdc:Bounds x="2480" y="268" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1uy0psd" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="2662" y="290" width="36" height="36" />
+      <bpmndi:BPMNShape id="BPMNShape_1h5kf2k" bpmnElement="CapturePaymentInPaymentService">
+        <omgdc:Bounds x="2300" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_01d96lp" bpmnElement="UpdateOrderStatusToProcessing">
+        <omgdc:Bounds x="1910" y="268" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_06x0x1n" bpmnElement="BuildCreateShipmentRequest">
+        <omgdc:Bounds x="1940" y="440" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0lv4ty3" bpmnElement="SendOrderShippedNotification">
+        <omgdc:Bounds x="2710" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0cma3uv" bpmnElement="CreateShipmentInShippingService">
+        <omgdc:Bounds x="1940" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1fzdnfa" bpmnElement="UpdateOrderStatusToShipped">
+        <omgdc:Bounds x="2320" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1m16jn8" bpmnElement="BuildOrderShippedNotificationRequest">
+        <omgdc:Bounds x="2510" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0wapzcd" bpmnElement="GenerateInvoiceInOrderService">
+        <omgdc:Bounds x="2910" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0o204v4" bpmnElement="UpdateOrderStatusToCompleted">
+        <omgdc:Bounds x="3110" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1j8tfx5" bpmnElement="EndEvent_Complete">
+        <omgdc:Bounds x="3372" y="622" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2656" y="266" width="48" height="14" />
+          <omgdc:Bounds x="3366" y="598" width="48" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0sp8w2f" bpmnElement="ExtractShipmentId">
+        <omgdc:Bounds x="2120" y="600" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
         <omgdi:waypoint x="198" y="308" />
@@ -404,9 +500,43 @@
         <omgdi:waypoint x="2400" y="308" />
         <omgdi:waypoint x="2480" y="308" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_16hoqro_di" bpmnElement="Flow_16hoqro">
+      <bpmndi:BPMNEdge id="Flow_0ft46rr_di" bpmnElement="Flow_0ft46rr">
         <omgdi:waypoint x="2580" y="308" />
-        <omgdi:waypoint x="2662" y="308" />
+        <omgdi:waypoint x="2670" y="308" />
+        <omgdi:waypoint x="2670" y="450" />
+        <omgdi:waypoint x="2040" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rg1d97_di" bpmnElement="Flow_1rg1d97">
+        <omgdi:waypoint x="1990" y="520" />
+        <omgdi:waypoint x="1990" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02m35dy_di" bpmnElement="Flow_02m35dy">
+        <omgdi:waypoint x="2040" y="640" />
+        <omgdi:waypoint x="2120" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wbvisc_di" bpmnElement="Flow_1wbvisc">
+        <omgdi:waypoint x="2420" y="640" />
+        <omgdi:waypoint x="2510" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jowsc5_di" bpmnElement="Flow_0jowsc5">
+        <omgdi:waypoint x="2610" y="640" />
+        <omgdi:waypoint x="2710" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mz64j9_di" bpmnElement="Flow_1mz64j9">
+        <omgdi:waypoint x="2810" y="640" />
+        <omgdi:waypoint x="2910" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mf9h3c_di" bpmnElement="Flow_1mf9h3c">
+        <omgdi:waypoint x="3010" y="640" />
+        <omgdi:waypoint x="3110" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1njb9pl_di" bpmnElement="Flow_1njb9pl">
+        <omgdi:waypoint x="3210" y="640" />
+        <omgdi:waypoint x="3372" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1givy57_di" bpmnElement="Flow_1givy57">
+        <omgdi:waypoint x="2220" y="640" />
+        <omgdi:waypoint x="2320" y="640" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
