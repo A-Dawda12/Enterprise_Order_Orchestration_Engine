@@ -17,10 +17,15 @@ public final class ActivityParameters {
     public static final String FRAUD_ASSESSMENT = "fraudAssessment";
     public static final String FRAUD_SCORE = "fraudScore";
     public static final String REQUIRES_FRAUD_REVIEW = "requiresFraudReview";
+    public static final String FRAUD_REQUEST = "fraudRequest";
     public static final String FRAUD_DECISION = "fraudDecision";
     public static final String SHIPMENT_ID = "shipmentId";
     public static final String SHIPMENT = "shipment";
     public static final String COMPENSATION_REASON = "compensationReason";
+    public static final String CREATE_SHIPMENT_REQUEST = "createShipmentRequest";
+    public static final String NOTIFICATION_REQUEST = "notificationRequest";
+    public static final String NOTIFICATION = "notification";
+    public static final String INVOICE = "invoice";
 
     private ActivityParameters() {
 

@@ -30,6 +30,10 @@ public class BuildAuthorizePaymentRequestWorker extends AbstractJobWorker{
         OrderResponse order = objectMapper.convertValue(variables.get(ActivityParameters.ORDER), OrderResponse.class);
         Object token = variables.get(ActivityParameters.PAYMENT_METHOD_TOKEN);
 
+        if(token == null || String.valueOf(token).isBlank()){
+            throw new IllegalStateException("paymentMethodToken missing from process variables");
+        }
+
         AuthorizeRequest request = new AuthorizeRequest()
                 .orderId(order.getOrderId())
                 .customerId(order.getCustomerId())

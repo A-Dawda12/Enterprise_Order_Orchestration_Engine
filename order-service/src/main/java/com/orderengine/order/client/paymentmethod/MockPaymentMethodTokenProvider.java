@@ -14,6 +14,6 @@ public class MockPaymentMethodTokenProvider implements PaymentMethodTokenProvide
     public String issueToken(String orderId, String customerId) {
         String digest = UUID.nameUUIDFromBytes((customerId + ":" + orderId).getBytes(StandardCharsets.UTF_8))
                 .toString().replace("-", "").substring(0, 16);
-        return TOKEN_PREFIX + orderId.replace("-", "").substring(0, 8) + "-" + digest;
+        return TOKEN_PREFIX + orderId.replace("-", "").substring(0, 8) + "_" + digest;
     }
 }

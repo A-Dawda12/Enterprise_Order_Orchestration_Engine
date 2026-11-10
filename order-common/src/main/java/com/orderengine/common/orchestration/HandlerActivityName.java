@@ -21,7 +21,7 @@ public class HandlerActivityName {
     public static final String AUTHORIZE_PAYMENT_IN_PAYMENT_SERVICE = "AuthorizePaymentInPaymentService";
     public static final String EXTRACT_PAYMENT_ID = "ExtractPaymentId";
     public static final String BUILD_FRAUD_ASSESSMENT_REQUEST = "BuildFraudAssessmentRequest";
-    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssesFraudInFraudService";
+    public static final String ASSES_FRAUD_IN_FRAUD_SERVICE = "AssessFraudInFraudService";
     public static final String EXTRACT_FRAUD_SCORE = "ExtractFraudScore";
     public static final String GATEWAY_PARALLEL_JOIN = "GatewayParallelJoin";
 
@@ -40,6 +40,8 @@ public class HandlerActivityName {
 // §4.4 Payment Capture & Shipping Activities
 // ==========================================================
 
+    public static final String UPDATE_ORDER_STATUS_TO_PROCESSING = "UpdateOrderStatusToProcessing";
+    public static final String UPDATE_ORDER_STATUS_TO_PAYMENT_PENDING = "UpdateOrderStatusToPaymentPending";
     public static final String CAPTURE_PAYMENT_IN_PAYMENT_SERVICE = "CapturePaymentInPaymentService";
     public static final String UPDATE_ORDER_STATUS_TO_PAID = "UpdateOrderStatusToPaid";
     public static final String BUILD_CREATE_SHIPMENT_REQUEST = "BuildCreateShipmentRequest";
