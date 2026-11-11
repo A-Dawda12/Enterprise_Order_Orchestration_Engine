@@ -26,6 +26,9 @@ public final class ActivityParameters {
     public static final String NOTIFICATION_REQUEST = "notificationRequest";
     public static final String NOTIFICATION = "notification";
     public static final String INVOICE = "invoice";
+    public static final String ASSESSMENT_ID = "assessmmentId";
+    public static final String REVIEWER_ID = "reviwerId";
+    public static final String REVIEW_NOTES = "reviewNotes";
 
     private ActivityParameters() {
 

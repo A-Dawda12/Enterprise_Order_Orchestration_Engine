@@ -33,9 +33,18 @@ public class UpdateOrderStatusToRejectedWorker extends AbstractJobWorker{
     protected Map<String, Object> execute(ActivatedJob job) {
         Map<String, Object> variables = job.getVariablesAsMap();
         String orderId = String.valueOf(variables.get(ActivityParameters.ORDER_ID));
-        String reason = variables.get(ActivityParameters.VALIDATION_ERRORS) instanceof List<?> errors
-                ? errors.stream().map(String::valueOf).collect(Collectors.joining(", "))
-                : null;
+//        String reason = variables.get(ActivityParameters.VALIDATION_ERRORS) instanceof List<?> errors
+//                ? errors.stream().map(String::valueOf).collect(Collectors.joining(", "))
+//                : null;
+
+        String reason = null;
+        if(variables.get(ActivityParameters.VALIDATION_ERRORS) instanceof List<?> errors && !errors.isEmpty()) {
+            reason = errors.stream().map(String::valueOf).collect(Collectors.joining(", "));
+        }
+        else if(variables.get(ActivityParameters.COMPENSATION_REASON) != null){
+            reason = String.valueOf(variables.get(ActivityParameters.COMPENSATION_REASON));
+
+        }
 
         OrderResponse order = orderServiceClient.updateStatus(
                 UUID.fromString(orderId),
