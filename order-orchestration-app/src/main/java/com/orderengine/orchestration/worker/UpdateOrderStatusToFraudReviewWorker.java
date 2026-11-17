@@ -7,10 +7,12 @@ import com.orderengine.client.order.model.StatusUpdateRequest;
 import com.orderengine.common.orchestration.ActivityParameters;
 import com.orderengine.common.orchestration.HandlerActivityName;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.UUID;
 
+@Component
 public class UpdateOrderStatusToFraudReviewWorker extends AbstractJobWorker {
 
     private final OrderServiceClient orderServiceClient;

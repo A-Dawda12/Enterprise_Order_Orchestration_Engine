@@ -57,9 +57,9 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=validItems = true and validAddress = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_GatewayToRejected" name="Invalid" sourceRef="Gateway_ValidationResult" targetRef="UpdateOrderStatusToRejected" />
-    <bpmn:serviceTask id="BuildReverseInventoryRequest" name="BuildReverseInventoryRequest">
+    <bpmn:serviceTask id="BuildReserveInventoryRequest" name="BuildReserveInventoryRequest">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="BuildReverseInventoryRequest" />
+        <zeebe:taskDefinition type="BuildReserveInventoryRequest" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_ForkToBuildReserve</bpmn:incoming>
       <bpmn:outgoing>Flow_1op5n5i</bpmn:outgoing>
@@ -78,7 +78,7 @@
       <bpmn:incoming>Flow_0tf18c9</bpmn:incoming>
       <bpmn:outgoing>Flow_19i4ov9</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1op5n5i" sourceRef="BuildReverseInventoryRequest" targetRef="ReserveInventoryInInventoryService" />
+    <bpmn:sequenceFlow id="Flow_1op5n5i" sourceRef="BuildReserveInventoryRequest" targetRef="ReserveInventoryInInventoryService" />
     <bpmn:sequenceFlow id="Flow_0tf18c9" sourceRef="ReserveInventoryInInventoryService" targetRef="ExtractReservationId" />
     <bpmn:serviceTask id="AuthorizePaymentInPaymentService" name="AuthorizePaymentInPaymentService">
       <bpmn:extensionElements>
@@ -132,7 +132,7 @@
       <bpmn:outgoing>Flow_ForkToBuildAuthorize</bpmn:outgoing>
       <bpmn:outgoing>Flow_FlowToBuildFraud</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:sequenceFlow id="Flow_ForkToBuildReserve" name="inventory" sourceRef="Gateway_ParallelFork" targetRef="BuildReverseInventoryRequest" />
+    <bpmn:sequenceFlow id="Flow_ForkToBuildReserve" name="inventory" sourceRef="Gateway_ParallelFork" targetRef="BuildReserveInventoryRequest" />
     <bpmn:sequenceFlow id="Flow_0pjr1j1" sourceRef="UpdateOrderStatusToValidated" targetRef="Gateway_ParallelFork" />
     <bpmn:sequenceFlow id="Flow_ForkToBuildAuthorize" name="payment" sourceRef="Gateway_ParallelFork" targetRef="BuildAuthorizePaymentRequest" />
     <bpmn:sequenceFlow id="Flow_FlowToBuildFraud" name="fraud" sourceRef="Gateway_ParallelFork" targetRef="BuildFraudAssessmentRequest" />
@@ -267,11 +267,12 @@
       <bpmn:outgoing>Flow_1664ig3</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_0agzyxo" sourceRef="UpdateOrderStatusToFraudReview" targetRef="FraudManagerReview" />
-    <bpmn:sequenceFlow id="Flow_FraudGatewayToReview" name="review" sourceRef="Gateway_FraudReviewRequired" targetRef="UpdateOrderStatusToFraudReview" />
+    <bpmn:sequenceFlow id="Flow_FraudGatewayToReview" name="review" sourceRef="Gateway_FraudReviewRequired" targetRef="UpdateOrderStatusToFraudReview">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=requiresFraudReview = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_08krsof" sourceRef="FraudManagerReview" targetRef="RecordFraudReviewDecision" />
     <bpmn:userTask id="FraudManagerReview" name="FraudManagerReview">
       <bpmn:extensionElements>
-        <zeebe:userTask />
         <zeebe:assignmentDefinition candidateGroups="fraud-managers" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0agzyxo</bpmn:incoming>
@@ -282,7 +283,9 @@
       <bpmn:outgoing>Flow_FraudApprovedToCapture</bpmn:outgoing>
       <bpmn:outgoing>Flow_FraudApprovedToRejected</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_FraudApprovedToCapture" name="approved" sourceRef="Gateway_FraudApproved" targetRef="CapturePaymentInPaymentService" />
+    <bpmn:sequenceFlow id="Flow_FraudApprovedToCapture" name="approved" sourceRef="Gateway_FraudApproved" targetRef="CapturePaymentInPaymentService">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=fraudDecision = "APPROVED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1664ig3" sourceRef="RecordFraudReviewDecision" targetRef="Gateway_FraudApproved" />
     <bpmn:sequenceFlow id="Flow_FraudApprovedToRejected" name="rejected" sourceRef="Gateway_FraudApproved" targetRef="UpdateOrderStatusToRejected" />
   </bpmn:process>
@@ -325,7 +328,7 @@
           <omgdc:Bounds x="765" y="529" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReverseInventoryRequest">
+      <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReserveInventoryRequest">
         <omgdc:Bounds x="1210" y="350" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>

@@ -20,7 +20,7 @@ import java.util.UUID;
 public class FraudReviewCompletionService {
 
     private final ZeebeClient zeebeClient;
-    private static final String USER_TASK_JOB_TYPE = "io.camunnda.zeebe:userTask";
+    private static final String USER_TASK_JOB_TYPE = "io.camunda.zeebe:userTask";
 
     public FraudReviewCompletionService(ZeebeClient zeebeClient) {
         this.zeebeClient = zeebeClient;
