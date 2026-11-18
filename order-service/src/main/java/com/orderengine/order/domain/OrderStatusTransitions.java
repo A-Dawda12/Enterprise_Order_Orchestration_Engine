@@ -17,6 +17,7 @@ public class OrderStatusTransitions {
         ));
         ALLOWED.put(OrderStatus.VALIDATED, EnumSet.of(
                 OrderStatus.PROCESSING,
+                OrderStatus.PAYMENT_TIMEOUT,
                 OrderStatus.REJECTED,
                 OrderStatus.CANCELLED
         ));
