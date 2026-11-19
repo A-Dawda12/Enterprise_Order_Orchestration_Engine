@@ -51,4 +51,4 @@ orderengine:
 
 shipping:
   stub:
-    fail-first-n-calls: ${SHIPPING_FAIL_FIRST_N:2}
+    fail-first-n-calls: ${SHIPPING_FAIL_FIRST_N:0}
