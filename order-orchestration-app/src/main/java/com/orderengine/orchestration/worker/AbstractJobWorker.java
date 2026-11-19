@@ -8,11 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 public abstract class AbstractJobWorker implements JobHandler {
+
+    private static final String RETRY_BACKOFF_HEADER = "retryBackoff";
 
     public abstract String jobType();
 
@@ -20,6 +23,11 @@ public abstract class AbstractJobWorker implements JobHandler {
 
     protected static UUID idempotencyKey(ActivatedJob job) {
         return UUID.nameUUIDFromBytes(String.valueOf(job.getKey()).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static Duration retryBackoff(ActivatedJob job) {
+        String value = job.getCustomHeaders().get(RETRY_BACKOFF_HEADER);
+        return value == null || value.isBlank() ? Duration.ZERO : Duration.parse(value.trim());
     }
 
     @Override
@@ -39,10 +47,14 @@ public abstract class AbstractJobWorker implements JobHandler {
                     .join();
             log.info("JOB OUT activity={} orderId={} durationMs={} output={}", job.getType(), orderId, System.currentTimeMillis() - startAt, output);
         }catch (Exception ex) {
-            log.error("JOB OUT activity={} orderId={} status=FAILED durationMs={} reason={}",
-                    job.getType(), orderId, System.currentTimeMillis() - startAt, ex.getMessage(), ex);
+
+            int retriesLeft = Math.max(job.getRetries() - 1, 0);
+            Duration backoff = retryBackoff(job);
+            log.error("JOB OUT activity={} orderId={} status=FAILED durationMs={} retriesLeft={} backoff={} reason={}", job.getType(), orderId, System.currentTimeMillis() - startAt, retriesLeft, backoff, ex.getMessage(), ex);
+
             client.newFailCommand(job.getKey())
-                    .retries(Math.max(job.getRetries() - 1, 0))
+                    .retries(retriesLeft)
+                    .retryBackoff(backoff)
                     .errorMessage(String.valueOf(ex.getMessage()))
                     .send()
                     .join();
