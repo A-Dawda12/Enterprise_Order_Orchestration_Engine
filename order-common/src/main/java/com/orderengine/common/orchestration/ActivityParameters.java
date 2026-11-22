@@ -30,6 +30,7 @@ public final class ActivityParameters {
     public static final String ASSESSMENT_ID = "assessmentId";
     public static final String REVIEWER_ID = "reviewerId";
     public static final String REVIEW_NOTES = "reviewNotes";
+    public static final String REFUND = "refund";
 
     private ActivityParameters() {
 

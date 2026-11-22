@@ -40,7 +40,6 @@
         <zeebe:taskDefinition type="UpdateOrderStatusToRejected" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_GatewayToRejected</bpmn:incoming>
-      <bpmn:incoming>Flow_FraudApprovedToRejected</bpmn:incoming>
       <bpmn:outgoing>Flow_0rms0qo</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_Rejected" name="Rejected">
@@ -196,6 +195,7 @@
         <zeebe:taskDefinition type="CreateShipmentInShippingService" retries="3" />
         <zeebe:taskHeaders>
           <zeebe:header key="retryBackoff" value="PT30S" />
+          <zeebe:header key="errorCodeOnExhaustion" value="SHIPPING_FAILED" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1rg1d97</bpmn:incoming>
@@ -281,16 +281,15 @@
       <bpmn:incoming>Flow_0agzyxo</bpmn:incoming>
       <bpmn:outgoing>Flow_08krsof</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_FraudApproved" name="Approved?" default="Flow_FraudApprovedToRejected">
+    <bpmn:exclusiveGateway id="Gateway_FraudApproved" name="Approved?" default="Flow_FraudRejectedToCompensation">
       <bpmn:incoming>Flow_1664ig3</bpmn:incoming>
       <bpmn:outgoing>Flow_FraudApprovedToCapture</bpmn:outgoing>
-      <bpmn:outgoing>Flow_FraudApprovedToRejected</bpmn:outgoing>
+      <bpmn:outgoing>Flow_FraudRejectedToCompensation</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_FraudApprovedToCapture" name="approved" sourceRef="Gateway_FraudApproved" targetRef="CapturePaymentInPaymentService">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=fraudDecision = "APPROVED"</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1664ig3" sourceRef="RecordFraudReviewDecision" targetRef="Gateway_FraudApproved" />
-    <bpmn:sequenceFlow id="Flow_FraudApprovedToRejected" name="rejected" sourceRef="Gateway_FraudApproved" targetRef="UpdateOrderStatusToRejected" />
     <bpmn:boundaryEvent id="TimerPaymentTimeout" name="Payment timeout" attachedToRef="AuthorizePaymentInPaymentService">
       <bpmn:outgoing>Flow_16w7bv3</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1hrkkd0">
@@ -302,398 +301,623 @@
         <zeebe:taskDefinition type="UpdateOrderStatusToPaymentTimeout" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_16w7bv3</bpmn:incoming>
-      <bpmn:outgoing>Flow_1opf6i7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PaymentTimeoutToCompensation</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_16w7bv3" sourceRef="TimerPaymentTimeout" targetRef="UpdateOrderStatusToPaymentTimeout" />
-    <bpmn:endEvent id="EndEvent_PaymentTimeout" name="Payment timed out">
-      <bpmn:incoming>Flow_1opf6i7</bpmn:incoming>
-      <bpmn:terminateEventDefinition id="TerminateEventDefinition_1inlq2z" />
+    <bpmn:boundaryEvent id="ErrorShippingFailed" name="Shipping failed" attachedToRef="CreateShipmentInShippingService">
+      <bpmn:outgoing>Flow_ShippingFailedToCompensation</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0krfr9j" errorRef="Error_0o9al9l" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="Gateway_CompensationEntry" name="Compensate">
+      <bpmn:incoming>Flow_ShippingFailedToCompensation</bpmn:incoming>
+      <bpmn:incoming>Flow_PaymentTimeoutToCompensation</bpmn:incoming>
+      <bpmn:incoming>Flow_FraudRejectedToCompensation</bpmn:incoming>
+      <bpmn:outgoing>Flow_CompensationEntryToCompensating</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_ShippingFailedToCompensation" sourceRef="ErrorShippingFailed" targetRef="Gateway_CompensationEntry" />
+    <bpmn:sequenceFlow id="Flow_PaymentTimeoutToCompensation" sourceRef="UpdateOrderStatusToPaymentTimeout" targetRef="Gateway_CompensationEntry" />
+    <bpmn:serviceTask id="UpdateOrderStatusToCompensating" name="UpdateOrderStatusToCompensating">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToCompensating" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_CompensationEntryToCompensating</bpmn:incoming>
+      <bpmn:outgoing>Flow_0z3vha7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_CompensationEntryToCompensating" sourceRef="Gateway_CompensationEntry" targetRef="UpdateOrderStatusToCompensating" />
+    <bpmn:sequenceFlow id="Flow_FraudRejectedToCompensation" name="rejected" sourceRef="Gateway_FraudApproved" targetRef="Gateway_CompensationEntry" />
+    <bpmn:exclusiveGateway id="Gateway_PaymentCompensationType" name="Payment state?" default="Flow_PaymentTypeToSkip">
+      <bpmn:incoming>Flow_0z3vha7</bpmn:incoming>
+      <bpmn:outgoing>Flow_PaymentTypeToRefund</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PaymentTypeToVoid</bpmn:outgoing>
+      <bpmn:outgoing>Flow_PaymentTypeToSkip</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0z3vha7" sourceRef="UpdateOrderStatusToCompensating" targetRef="Gateway_PaymentCompensationType" />
+    <bpmn:serviceTask id="RefundPaymentInPaymentService" name="RefundPaymentInPaymentService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="RefundPaymentInPaymentService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_PaymentTypeToRefund</bpmn:incoming>
+      <bpmn:outgoing>Flow_RefundToPaymentDone</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="VoidPaymentInPaymentService" name="VoidPaymentInPaymentService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="VoidPaymentInPaymentService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_PaymentTypeToVoid</bpmn:incoming>
+      <bpmn:outgoing>Flow_VoidToPaymentDone</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_PaymentTypeToRefund" name="captured" sourceRef="Gateway_PaymentCompensationType" targetRef="RefundPaymentInPaymentService">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=payment != null and payment.status = "CAPTURED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_PaymentTypeToVoid" name="authorized" sourceRef="Gateway_PaymentCompensationType" targetRef="VoidPaymentInPaymentService">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=payment != null and payment.status = "AUTHORIZED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_PaymentCompensationDone" name="Gateway_PaymentCompensationDone">
+      <bpmn:incoming>Flow_PaymentTypeToSkip</bpmn:incoming>
+      <bpmn:incoming>Flow_RefundToPaymentDone</bpmn:incoming>
+      <bpmn:incoming>Flow_VoidToPaymentDone</bpmn:incoming>
+      <bpmn:outgoing>Flow_PaymentDoneToCancelShipment</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_PaymentTypeToSkip" name="no_payment" sourceRef="Gateway_PaymentCompensationType" targetRef="Gateway_PaymentCompensationDone" />
+    <bpmn:sequenceFlow id="Flow_RefundToPaymentDone" sourceRef="RefundPaymentInPaymentService" targetRef="Gateway_PaymentCompensationDone" />
+    <bpmn:sequenceFlow id="Flow_VoidToPaymentDone" sourceRef="VoidPaymentInPaymentService" targetRef="Gateway_PaymentCompensationDone" />
+    <bpmn:serviceTask id="CancelShipmentInShippingService" name="CancelShipmentInShippingService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="CancelShipmentInShippingService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_PaymentDoneToCancelShipment</bpmn:incoming>
+      <bpmn:outgoing>Flow_16dywf2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ReleaseInventoryInInventoryService" name="ReleaseInventoryInInventoryService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="ReleaseInventoryInInventoryService" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16dywf2</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k2ylhx</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="BuildOrderCancelledNotificationRequest" name="BuildOrderCancelledNotificationRequest">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="BuildOrderCancelledNotificationRequest" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0k2ylhx</bpmn:incoming>
+      <bpmn:outgoing>Flow_00tkcll</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="SendOrderCancelledNotification" name="SendOrderCancelledNotification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="SendOrderCancelledNotification" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_00tkcll</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zwa5mt</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="UpdateOrderStatusToCancelled" name="UpdateOrderStatusToCancelled">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToCancelled" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0zwa5mt</bpmn:incoming>
+      <bpmn:outgoing>Flow_0x0ytxp</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_OrderCancelled" name="Order cancelled">
+      <bpmn:incoming>Flow_0x0ytxp</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_04i6ax9" />
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1opf6i7" sourceRef="UpdateOrderStatusToPaymentTimeout" targetRef="EndEvent_PaymentTimeout" />
+    <bpmn:sequenceFlow id="Flow_0x0ytxp" sourceRef="UpdateOrderStatusToCancelled" targetRef="EndEvent_OrderCancelled" />
+    <bpmn:sequenceFlow id="Flow_PaymentDoneToCancelShipment" sourceRef="Gateway_PaymentCompensationDone" targetRef="CancelShipmentInShippingService" />
+    <bpmn:sequenceFlow id="Flow_16dywf2" sourceRef="CancelShipmentInShippingService" targetRef="ReleaseInventoryInInventoryService" />
+    <bpmn:sequenceFlow id="Flow_0k2ylhx" sourceRef="ReleaseInventoryInInventoryService" targetRef="BuildOrderCancelledNotificationRequest" />
+    <bpmn:sequenceFlow id="Flow_00tkcll" sourceRef="BuildOrderCancelledNotificationRequest" targetRef="SendOrderCancelledNotification" />
+    <bpmn:sequenceFlow id="Flow_0zwa5mt" sourceRef="SendOrderCancelledNotification" targetRef="UpdateOrderStatusToCancelled" />
   </bpmn:process>
+  <bpmn:error id="Error_0o9al9l" name="SHIPPING_FAILED" errorCode="SHIPPING_FAILED" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
       <bpmndi:BPMNShape id="StartEvent_OrderReceived_di" bpmnElement="StartEvent_OrderReceived">
-        <omgdc:Bounds x="232" y="560" width="36" height="36" />
+        <omgdc:Bounds x="172" y="460" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="211" y="596" width="78" height="14" />
+          <omgdc:Bounds x="151" y="496" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="GetOrderForFulfillment_di" bpmnElement="GetOrderForFulfillment">
-        <omgdc:Bounds x="330" y="538" width="100" height="80" />
+        <omgdc:Bounds x="270" y="438" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1k8mkl5" bpmnElement="ValidateOrderItems">
-        <omgdc:Bounds x="470" y="538" width="100" height="80" />
+        <omgdc:Bounds x="410" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_06c9pcn" bpmnElement="ValidateShippingAddress">
-        <omgdc:Bounds x="610" y="538" width="100" height="80" />
+        <omgdc:Bounds x="550" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1tkl8y3" bpmnElement="UpdateOrderStatusToValidated">
-        <omgdc:Bounds x="900" y="538" width="100" height="80" />
+        <omgdc:Bounds x="840" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1lihiwh" bpmnElement="UpdateOrderStatusToRejected">
-        <omgdc:Bounds x="730" y="670" width="100" height="80" />
+        <omgdc:Bounds x="670" y="570" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1380gy3_di" bpmnElement="EndEvent_Rejected">
-        <omgdc:Bounds x="762" y="822" width="36" height="36" />
+        <omgdc:Bounds x="702" y="722" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="758" y="865" width="44" height="14" />
+          <omgdc:Bounds x="698" y="765" width="44" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1yyigds_di" bpmnElement="Gateway_ValidationResult" isMarkerVisible="true">
-        <omgdc:Bounds x="755" y="553" width="50" height="50" />
+        <omgdc:Bounds x="695" y="453" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="765" y="529" width="30" height="14" />
+          <omgdc:Bounds x="705" y="429" width="30" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1e8wpdn" bpmnElement="BuildReserveInventoryRequest">
-        <omgdc:Bounds x="1210" y="350" width="100" height="80" />
+        <omgdc:Bounds x="1150" y="250" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_19foara" bpmnElement="ReserveInventoryInInventoryService">
-        <omgdc:Bounds x="1420" y="350" width="100" height="80" />
+        <omgdc:Bounds x="1360" y="250" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1eya5d5" bpmnElement="ExtractReservationId">
-        <omgdc:Bounds x="1610" y="350" width="100" height="80" />
+        <omgdc:Bounds x="1550" y="250" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0hiopaq" bpmnElement="AuthorizePaymentInPaymentService">
-        <omgdc:Bounds x="1420" y="538" width="100" height="80" />
+        <omgdc:Bounds x="1360" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_144si6u" bpmnElement="BuildAuthorizePaymentRequest">
-        <omgdc:Bounds x="1210" y="538" width="100" height="80" />
+        <omgdc:Bounds x="1150" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0f85erm" bpmnElement="ExtractPaymentId">
-        <omgdc:Bounds x="1610" y="538" width="100" height="80" />
+        <omgdc:Bounds x="1550" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1yyap1m" bpmnElement="BuildFraudAssessmentRequest">
-        <omgdc:Bounds x="1210" y="720" width="100" height="80" />
+        <omgdc:Bounds x="1150" y="620" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0u09y2w" bpmnElement="AssessFraudInFraudService">
-        <omgdc:Bounds x="1420" y="720" width="100" height="80" />
+        <omgdc:Bounds x="1360" y="620" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0gedkmu" bpmnElement="ExtractFraudScore">
-        <omgdc:Bounds x="1610" y="720" width="100" height="80" />
+        <omgdc:Bounds x="1550" y="620" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_00aqdv3_di" bpmnElement="Gateway_ParallelFork">
-        <omgdc:Bounds x="1055" y="553" width="50" height="50" />
+        <omgdc:Bounds x="995" y="453" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1036" y="613" width="87" height="27" />
+          <omgdc:Bounds x="976" y="513" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_101akz0" bpmnElement="Gateway_ParallelJoin">
-        <omgdc:Bounds x="1825" y="553" width="50" height="50" />
+        <omgdc:Bounds x="1765" y="453" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1856" y="516" width="87" height="27" />
+          <omgdc:Bounds x="1796" y="416" width="87" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_14u6mxq" bpmnElement="UpdateOrderStatusToPaymentPending">
-        <omgdc:Bounds x="2170" y="538" width="100" height="80" />
+        <omgdc:Bounds x="2110" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1duo555" bpmnElement="UpdateOrderStatusToPaid">
-        <omgdc:Bounds x="2670" y="538" width="100" height="80" />
+        <omgdc:Bounds x="2610" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1h5kf2k" bpmnElement="CapturePaymentInPaymentService">
-        <omgdc:Bounds x="2480" y="538" width="100" height="80" />
+        <omgdc:Bounds x="2420" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_01d96lp" bpmnElement="UpdateOrderStatusToProcessing">
-        <omgdc:Bounds x="1980" y="538" width="100" height="80" />
+        <omgdc:Bounds x="1920" y="438" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_06x0x1n" bpmnElement="BuildCreateShipmentRequest">
-        <omgdc:Bounds x="2010" y="710" width="100" height="80" />
+        <omgdc:Bounds x="1950" y="610" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0lv4ty3" bpmnElement="SendOrderShippedNotification">
-        <omgdc:Bounds x="2780" y="870" width="100" height="80" />
+        <omgdc:Bounds x="2720" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0cma3uv" bpmnElement="CreateShipmentInShippingService">
-        <omgdc:Bounds x="2010" y="870" width="100" height="80" />
+        <omgdc:Bounds x="1950" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1fzdnfa" bpmnElement="UpdateOrderStatusToShipped">
-        <omgdc:Bounds x="2390" y="870" width="100" height="80" />
+        <omgdc:Bounds x="2330" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1m16jn8" bpmnElement="BuildOrderShippedNotificationRequest">
-        <omgdc:Bounds x="2580" y="870" width="100" height="80" />
+        <omgdc:Bounds x="2520" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0wapzcd" bpmnElement="GenerateInvoiceInOrderService">
-        <omgdc:Bounds x="2980" y="870" width="100" height="80" />
+        <omgdc:Bounds x="2920" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0o204v4" bpmnElement="UpdateOrderStatusToCompleted">
-        <omgdc:Bounds x="3180" y="870" width="100" height="80" />
+        <omgdc:Bounds x="3120" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1j8tfx5" bpmnElement="EndEvent_Complete">
-        <omgdc:Bounds x="3442" y="892" width="36" height="36" />
+        <omgdc:Bounds x="3382" y="792" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="3436" y="868" width="48" height="14" />
+          <omgdc:Bounds x="3376" y="768" width="48" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0sp8w2f" bpmnElement="ExtractShipmentId">
-        <omgdc:Bounds x="2190" y="870" width="100" height="80" />
+        <omgdc:Bounds x="2130" y="770" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0ol9ua0_di" bpmnElement="Gateway_FraudReviewRequired" isMarkerVisible="true">
-        <omgdc:Bounds x="2345" y="553" width="50" height="50" />
+        <omgdc:Bounds x="2285" y="453" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2349" y="610" width="43" height="14" />
+          <omgdc:Bounds x="2289" y="510" width="43" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1kxoj2x" bpmnElement="UpdateOrderStatusToFraudReview">
-        <omgdc:Bounds x="2320" y="320" width="100" height="80" />
+        <omgdc:Bounds x="2260" y="220" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1jo9tqu" bpmnElement="RecordFraudReviewDecision">
-        <omgdc:Bounds x="2480" y="180" width="100" height="80" />
+        <omgdc:Bounds x="2420" y="80" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_00922n7_di" bpmnElement="FraudManagerReview">
-        <omgdc:Bounds x="2320" y="180" width="100" height="80" />
+        <omgdc:Bounds x="2260" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1n8ts89" bpmnElement="Gateway_FraudApproved" isMarkerVisible="true">
-        <omgdc:Bounds x="2505" y="345" width="50" height="50" />
+        <omgdc:Bounds x="2445" y="245" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2446" y="363" width="54" height="14" />
+          <omgdc:Bounds x="2386" y="263" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1m4brpc" bpmnElement="UpdateOrderStatusToPaymentTimeout">
-        <omgdc:Bounds x="1520" y="900" width="100" height="80" />
+        <omgdc:Bounds x="1460" y="800" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1to2x2o_di" bpmnElement="EndEvent_PaymentTimeout">
-        <omgdc:Bounds x="1732" y="922" width="36" height="36" />
+      <bpmndi:BPMNShape id="Gateway_1laxakr_di" bpmnElement="Gateway_CompensationEntry" isMarkerVisible="true">
+        <omgdc:Bounds x="1725" y="1115" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1713" y="965" width="74" height="27" />
+          <omgdc:Bounds x="1785" y="1133" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1iwopju" bpmnElement="UpdateOrderStatusToCompensating">
+        <omgdc:Bounds x="1840" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0t16am0_di" bpmnElement="Gateway_PaymentCompensationType" isMarkerVisible="true">
+        <omgdc:Bounds x="2025" y="1115" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2061" y="1103" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_067u0ib" bpmnElement="RefundPaymentInPaymentService">
+        <omgdc:Bounds x="2160" y="960" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0m2ahai" bpmnElement="VoidPaymentInPaymentService">
+        <omgdc:Bounds x="2160" y="1260" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_149lxfm_di" bpmnElement="Gateway_PaymentCompensationDone" isMarkerVisible="true">
+        <omgdc:Bounds x="2335" y="1115" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2395" y="1120" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0wtrxma" bpmnElement="CancelShipmentInShippingService">
+        <omgdc:Bounds x="2520" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_05156me" bpmnElement="ReleaseInventoryInInventoryService">
+        <omgdc:Bounds x="2720" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1pokt26" bpmnElement="BuildOrderCancelledNotificationRequest">
+        <omgdc:Bounds x="2920" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0kmkaxk" bpmnElement="SendOrderCancelledNotification">
+        <omgdc:Bounds x="3120" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1s37wbb" bpmnElement="UpdateOrderStatusToCancelled">
+        <omgdc:Bounds x="3330" y="1100" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09innen_di" bpmnElement="EndEvent_OrderCancelled">
+        <omgdc:Bounds x="3532" y="1122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="3512" y="1165" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1rb7lgz_di" bpmnElement="ErrorShippingFailed">
+        <omgdc:Bounds x="2002" y="832" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1984" y="875" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0mwvt5v_di" bpmnElement="TimerPaymentTimeout">
-        <omgdc:Bounds x="1482" y="600" width="36" height="36" />
+        <omgdc:Bounds x="1422" y="500" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1459" y="643" width="83" height="14" />
+          <omgdc:Bounds x="1399" y="543" width="83" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
-        <omgdi:waypoint x="268" y="578" />
-        <omgdi:waypoint x="330" y="578" />
+        <omgdi:waypoint x="208" y="478" />
+        <omgdi:waypoint x="270" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0hekur2_di" bpmnElement="Flow_0hekur2">
-        <omgdi:waypoint x="430" y="578" />
-        <omgdi:waypoint x="470" y="578" />
+        <omgdi:waypoint x="370" y="478" />
+        <omgdi:waypoint x="410" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_07bh6wb_di" bpmnElement="Flow_07bh6wb">
-        <omgdi:waypoint x="570" y="578" />
-        <omgdi:waypoint x="610" y="578" />
+        <omgdi:waypoint x="510" y="478" />
+        <omgdi:waypoint x="550" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0rms0qo_di" bpmnElement="Flow_0rms0qo">
-        <omgdi:waypoint x="780" y="750" />
-        <omgdi:waypoint x="780" y="822" />
+        <omgdi:waypoint x="720" y="650" />
+        <omgdi:waypoint x="720" y="722" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0gkz6ue_di" bpmnElement="Flow_0gkz6ue">
-        <omgdi:waypoint x="710" y="578" />
-        <omgdi:waypoint x="755" y="578" />
+        <omgdi:waypoint x="650" y="478" />
+        <omgdi:waypoint x="695" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0plt5p0_di" bpmnElement="Flow_GatewayToValidated">
-        <omgdi:waypoint x="805" y="578" />
-        <omgdi:waypoint x="900" y="578" />
+        <omgdi:waypoint x="745" y="478" />
+        <omgdi:waypoint x="840" y="478" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="841" y="560" width="23" height="14" />
+          <omgdc:Bounds x="781" y="460" width="23" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1j4wjvr_di" bpmnElement="Flow_GatewayToRejected">
-        <omgdi:waypoint x="780" y="603" />
-        <omgdi:waypoint x="780" y="670" />
+        <omgdi:waypoint x="720" y="503" />
+        <omgdi:waypoint x="720" y="570" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="794" y="644" width="32" height="14" />
+          <omgdc:Bounds x="734" y="544" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1op5n5i_di" bpmnElement="Flow_1op5n5i">
-        <omgdi:waypoint x="1310" y="390" />
-        <omgdi:waypoint x="1420" y="390" />
+        <omgdi:waypoint x="1250" y="290" />
+        <omgdi:waypoint x="1360" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0tf18c9_di" bpmnElement="Flow_0tf18c9">
-        <omgdi:waypoint x="1520" y="390" />
-        <omgdi:waypoint x="1610" y="390" />
+        <omgdi:waypoint x="1460" y="290" />
+        <omgdi:waypoint x="1550" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1xb44ya_di" bpmnElement="Flow_1xb44ya">
-        <omgdi:waypoint x="1310" y="578" />
-        <omgdi:waypoint x="1420" y="578" />
+        <omgdi:waypoint x="1250" y="478" />
+        <omgdi:waypoint x="1360" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x73g6v_di" bpmnElement="Flow_1x73g6v">
-        <omgdi:waypoint x="1520" y="578" />
-        <omgdi:waypoint x="1610" y="578" />
+        <omgdi:waypoint x="1460" y="478" />
+        <omgdi:waypoint x="1550" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0yyjs8r_di" bpmnElement="Flow_0yyjs8r">
-        <omgdi:waypoint x="1310" y="760" />
-        <omgdi:waypoint x="1420" y="760" />
+        <omgdi:waypoint x="1250" y="660" />
+        <omgdi:waypoint x="1360" y="660" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_09g5ajd_di" bpmnElement="Flow_09g5ajd">
-        <omgdi:waypoint x="1520" y="760" />
-        <omgdi:waypoint x="1610" y="760" />
+        <omgdi:waypoint x="1460" y="660" />
+        <omgdi:waypoint x="1550" y="660" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_05ynxfv_di" bpmnElement="Flow_ForkToBuildReserve">
-        <omgdi:waypoint x="1080" y="553" />
-        <omgdi:waypoint x="1080" y="390" />
-        <omgdi:waypoint x="1210" y="390" />
+        <omgdi:waypoint x="1020" y="453" />
+        <omgdi:waypoint x="1020" y="290" />
+        <omgdi:waypoint x="1150" y="290" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1073" y="469" width="45" height="14" />
+          <omgdc:Bounds x="1013" y="369" width="45" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pjr1j1_di" bpmnElement="Flow_0pjr1j1">
-        <omgdi:waypoint x="1000" y="578" />
-        <omgdi:waypoint x="1055" y="578" />
+        <omgdi:waypoint x="940" y="478" />
+        <omgdi:waypoint x="995" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1tv5ei3_di" bpmnElement="Flow_ForkToBuildAuthorize">
-        <omgdi:waypoint x="1105" y="578" />
-        <omgdi:waypoint x="1210" y="578" />
+        <omgdi:waypoint x="1045" y="478" />
+        <omgdi:waypoint x="1150" y="478" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1137" y="560" width="43" height="14" />
+          <omgdc:Bounds x="1077" y="460" width="43" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_04sowxz_di" bpmnElement="Flow_FlowToBuildFraud">
-        <omgdi:waypoint x="1080" y="603" />
-        <omgdi:waypoint x="1080" y="760" />
-        <omgdi:waypoint x="1210" y="760" />
+        <omgdi:waypoint x="1020" y="503" />
+        <omgdi:waypoint x="1020" y="660" />
+        <omgdi:waypoint x="1150" y="660" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1082" y="680" width="26" height="14" />
+          <omgdc:Bounds x="1022" y="580" width="26" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_19i4ov9_di" bpmnElement="Flow_19i4ov9">
-        <omgdi:waypoint x="1710" y="390" />
-        <omgdi:waypoint x="1850" y="390" />
-        <omgdi:waypoint x="1850" y="553" />
+        <omgdi:waypoint x="1650" y="290" />
+        <omgdi:waypoint x="1790" y="290" />
+        <omgdi:waypoint x="1790" y="453" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1jef0vw_di" bpmnElement="Flow_1jef0vw">
-        <omgdi:waypoint x="1710" y="578" />
-        <omgdi:waypoint x="1825" y="578" />
+        <omgdi:waypoint x="1650" y="478" />
+        <omgdi:waypoint x="1765" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0mlbinn_di" bpmnElement="Flow_0mlbinn">
-        <omgdi:waypoint x="1710" y="760" />
-        <omgdi:waypoint x="1850" y="760" />
-        <omgdi:waypoint x="1850" y="603" />
+        <omgdi:waypoint x="1650" y="660" />
+        <omgdi:waypoint x="1790" y="660" />
+        <omgdi:waypoint x="1790" y="503" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1x55iac_di" bpmnElement="Flow_1x55iac">
-        <omgdi:waypoint x="1875" y="578" />
-        <omgdi:waypoint x="1980" y="578" />
+        <omgdi:waypoint x="1815" y="478" />
+        <omgdi:waypoint x="1920" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_18jdijl_di" bpmnElement="Flow_18jdijl">
-        <omgdi:waypoint x="2080" y="578" />
-        <omgdi:waypoint x="2170" y="578" />
+        <omgdi:waypoint x="2020" y="478" />
+        <omgdi:waypoint x="2110" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1wz0v44_di" bpmnElement="Flow_1wz0v44">
-        <omgdi:waypoint x="2580" y="578" />
-        <omgdi:waypoint x="2670" y="578" />
+        <omgdi:waypoint x="2520" y="478" />
+        <omgdi:waypoint x="2610" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ft46rr_di" bpmnElement="Flow_0ft46rr">
-        <omgdi:waypoint x="2720" y="618" />
-        <omgdi:waypoint x="2720" y="720" />
-        <omgdi:waypoint x="2110" y="720" />
+        <omgdi:waypoint x="2660" y="518" />
+        <omgdi:waypoint x="2660" y="620" />
+        <omgdi:waypoint x="2050" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1rg1d97_di" bpmnElement="Flow_1rg1d97">
-        <omgdi:waypoint x="2060" y="790" />
-        <omgdi:waypoint x="2060" y="870" />
+        <omgdi:waypoint x="2000" y="690" />
+        <omgdi:waypoint x="2000" y="770" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02m35dy_di" bpmnElement="Flow_02m35dy">
-        <omgdi:waypoint x="2110" y="910" />
-        <omgdi:waypoint x="2190" y="910" />
+        <omgdi:waypoint x="2050" y="810" />
+        <omgdi:waypoint x="2130" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1wbvisc_di" bpmnElement="Flow_1wbvisc">
-        <omgdi:waypoint x="2490" y="910" />
-        <omgdi:waypoint x="2580" y="910" />
+        <omgdi:waypoint x="2430" y="810" />
+        <omgdi:waypoint x="2520" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0jowsc5_di" bpmnElement="Flow_0jowsc5">
-        <omgdi:waypoint x="2680" y="910" />
-        <omgdi:waypoint x="2780" y="910" />
+        <omgdi:waypoint x="2620" y="810" />
+        <omgdi:waypoint x="2720" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1mz64j9_di" bpmnElement="Flow_1mz64j9">
-        <omgdi:waypoint x="2880" y="910" />
-        <omgdi:waypoint x="2980" y="910" />
+        <omgdi:waypoint x="2820" y="810" />
+        <omgdi:waypoint x="2920" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1mf9h3c_di" bpmnElement="Flow_1mf9h3c">
-        <omgdi:waypoint x="3080" y="910" />
-        <omgdi:waypoint x="3180" y="910" />
+        <omgdi:waypoint x="3020" y="810" />
+        <omgdi:waypoint x="3120" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1njb9pl_di" bpmnElement="Flow_1njb9pl">
-        <omgdi:waypoint x="3280" y="910" />
-        <omgdi:waypoint x="3442" y="910" />
+        <omgdi:waypoint x="3220" y="810" />
+        <omgdi:waypoint x="3382" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1givy57_di" bpmnElement="Flow_1givy57">
-        <omgdi:waypoint x="2290" y="910" />
-        <omgdi:waypoint x="2390" y="910" />
+        <omgdi:waypoint x="2230" y="810" />
+        <omgdi:waypoint x="2330" y="810" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1f024cs_di" bpmnElement="Flow_1f024cs">
-        <omgdi:waypoint x="2270" y="578" />
-        <omgdi:waypoint x="2345" y="578" />
+        <omgdi:waypoint x="2210" y="478" />
+        <omgdi:waypoint x="2285" y="478" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0mb8ury_di" bpmnElement="Flow_FraudGatewayToCapture">
-        <omgdi:waypoint x="2395" y="578" />
-        <omgdi:waypoint x="2480" y="578" />
+        <omgdi:waypoint x="2335" y="478" />
+        <omgdi:waypoint x="2420" y="478" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2428" y="560" width="20" height="14" />
+          <omgdc:Bounds x="2368" y="460" width="20" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0agzyxo_di" bpmnElement="Flow_0agzyxo">
-        <omgdi:waypoint x="2370" y="320" />
-        <omgdi:waypoint x="2370" y="260" />
+        <omgdi:waypoint x="2310" y="220" />
+        <omgdi:waypoint x="2310" y="160" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0b70954_di" bpmnElement="Flow_FraudGatewayToReview">
-        <omgdi:waypoint x="2370" y="553" />
-        <omgdi:waypoint x="2370" y="400" />
+        <omgdi:waypoint x="2310" y="453" />
+        <omgdi:waypoint x="2310" y="300" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2369" y="473.5" width="32" height="14" />
+          <omgdc:Bounds x="2309" y="374" width="32" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_08krsof_di" bpmnElement="Flow_08krsof">
-        <omgdi:waypoint x="2420" y="220" />
-        <omgdi:waypoint x="2480" y="220" />
+        <omgdi:waypoint x="2360" y="120" />
+        <omgdi:waypoint x="2420" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0t5mwlg_di" bpmnElement="Flow_FraudApprovedToCapture">
-        <omgdi:waypoint x="2530" y="395" />
-        <omgdi:waypoint x="2530" y="538" />
+        <omgdi:waypoint x="2470" y="295" />
+        <omgdi:waypoint x="2470" y="438" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="2522" y="463.5" width="46" height="14" />
+          <omgdc:Bounds x="2462" y="364" width="46" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1664ig3_di" bpmnElement="Flow_1664ig3">
-        <omgdi:waypoint x="2530" y="260" />
-        <omgdi:waypoint x="2530" y="345" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1msu1dd_di" bpmnElement="Flow_FraudApprovedToRejected">
-        <omgdi:waypoint x="2555" y="370" />
-        <omgdi:waypoint x="2670" y="370" />
-        <omgdi:waypoint x="2670" y="90" />
-        <omgdi:waypoint x="150" y="90" />
-        <omgdi:waypoint x="150" y="710" />
-        <omgdi:waypoint x="730" y="710" />
-        <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="1390" y="72" width="40" height="14" />
-        </bpmndi:BPMNLabel>
+        <omgdi:waypoint x="2470" y="160" />
+        <omgdi:waypoint x="2470" y="245" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_16w7bv3_di" bpmnElement="Flow_16w7bv3">
-        <omgdi:waypoint x="1518" y="618" />
-        <omgdi:waypoint x="1570" y="618" />
-        <omgdi:waypoint x="1570" y="900" />
+        <omgdi:waypoint x="1458" y="518" />
+        <omgdi:waypoint x="1510" y="518" />
+        <omgdi:waypoint x="1510" y="800" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1opf6i7_di" bpmnElement="Flow_1opf6i7">
-        <omgdi:waypoint x="1620" y="940" />
-        <omgdi:waypoint x="1732" y="940" />
+      <bpmndi:BPMNEdge id="Flow_0882suf_di" bpmnElement="Flow_ShippingFailedToCompensation">
+        <omgdi:waypoint x="2020" y="868" />
+        <omgdi:waypoint x="2020" y="910" />
+        <omgdi:waypoint x="1750" y="910" />
+        <omgdi:waypoint x="1750" y="1115" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1h5c8a0_di" bpmnElement="Flow_PaymentTimeoutToCompensation">
+        <omgdi:waypoint x="1510" y="880" />
+        <omgdi:waypoint x="1510" y="1140" />
+        <omgdi:waypoint x="1725" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k0l04c_di" bpmnElement="Flow_CompensationEntryToCompensating">
+        <omgdi:waypoint x="1775" y="1140" />
+        <omgdi:waypoint x="1840" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f2jucb_di" bpmnElement="Flow_FraudRejectedToCompensation">
+        <omgdi:waypoint x="2495" y="270" />
+        <omgdi:waypoint x="3620" y="270" />
+        <omgdi:waypoint x="3620" y="1500" />
+        <omgdi:waypoint x="1750" y="1500" />
+        <omgdi:waypoint x="1750" y="1165" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="3615" y="883" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0z3vha7_di" bpmnElement="Flow_0z3vha7">
+        <omgdi:waypoint x="1940" y="1140" />
+        <omgdi:waypoint x="2025" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pem4zc_di" bpmnElement="Flow_PaymentTypeToRefund">
+        <omgdi:waypoint x="2050" y="1115" />
+        <omgdi:waypoint x="2050" y="1000" />
+        <omgdi:waypoint x="2160" y="1000" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2028" y="1034" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09flas7_di" bpmnElement="Flow_PaymentTypeToVoid">
+        <omgdi:waypoint x="2050" y="1165" />
+        <omgdi:waypoint x="2050" y="1300" />
+        <omgdi:waypoint x="2160" y="1300" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2039" y="1229" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qp4vsw_di" bpmnElement="Flow_PaymentTypeToSkip">
+        <omgdi:waypoint x="2075" y="1140" />
+        <omgdi:waypoint x="2335" y="1140" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="2175" y="1122" width="61" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08pxrj6_di" bpmnElement="Flow_RefundToPaymentDone">
+        <omgdi:waypoint x="2260" y="1000" />
+        <omgdi:waypoint x="2360" y="1000" />
+        <omgdi:waypoint x="2360" y="1115" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qy0nek_di" bpmnElement="Flow_VoidToPaymentDone">
+        <omgdi:waypoint x="2260" y="1300" />
+        <omgdi:waypoint x="2360" y="1300" />
+        <omgdi:waypoint x="2360" y="1165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0x0ytxp_di" bpmnElement="Flow_0x0ytxp">
+        <omgdi:waypoint x="3430" y="1140" />
+        <omgdi:waypoint x="3532" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1s288y1_di" bpmnElement="Flow_PaymentDoneToCancelShipment">
+        <omgdi:waypoint x="2385" y="1140" />
+        <omgdi:waypoint x="2520" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16dywf2_di" bpmnElement="Flow_16dywf2">
+        <omgdi:waypoint x="2620" y="1140" />
+        <omgdi:waypoint x="2720" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k2ylhx_di" bpmnElement="Flow_0k2ylhx">
+        <omgdi:waypoint x="2820" y="1140" />
+        <omgdi:waypoint x="2920" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00tkcll_di" bpmnElement="Flow_00tkcll">
+        <omgdi:waypoint x="3020" y="1140" />
+        <omgdi:waypoint x="3120" y="1140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zwa5mt_di" bpmnElement="Flow_0zwa5mt">
+        <omgdi:waypoint x="3220" y="1140" />
+        <omgdi:waypoint x="3330" y="1140" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

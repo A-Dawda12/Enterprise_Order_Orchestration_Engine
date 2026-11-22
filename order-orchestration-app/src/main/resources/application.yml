@@ -18,7 +18,7 @@ zeebe:
       plaintext: true
 
 orchestration:
-  payment-timeout: ${PAYMENT_TIMEOUT:PT15M}
+  payment-timeout: ${PAYMENT_TIMEOUT:PT5M}
 
 management:
   endpoints:
