@@ -17,6 +17,9 @@ zeebe:
     security:
       plaintext: true
 
+orchestration:
+  payment-timeout: ${PAYMENT_TIMEOUT:PT15M}
+
 management:
   endpoints:
     web:

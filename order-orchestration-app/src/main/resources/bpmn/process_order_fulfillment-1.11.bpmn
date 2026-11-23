@@ -288,6 +288,25 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1664ig3" sourceRef="RecordFraudReviewDecision" targetRef="Gateway_FraudApproved" />
     <bpmn:sequenceFlow id="Flow_FraudApprovedToRejected" name="rejected" sourceRef="Gateway_FraudApproved" targetRef="UpdateOrderStatusToRejected" />
+    <bpmn:boundaryEvent id="TimerPaymentTimeout" name="Payment timeout" attachedToRef="AuthorizePaymentInPaymentService">
+      <bpmn:outgoing>Flow_16w7bv3</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1hrkkd0">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">=paymentTimeout</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="UpdateOrderStatusToPaymentTimeout" name="UpdateOrderStatusToPaymentTimeout">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="UpdateOrderStatusToPaymentTimeout" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16w7bv3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1opf6i7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_16w7bv3" sourceRef="TimerPaymentTimeout" targetRef="UpdateOrderStatusToPaymentTimeout" />
+    <bpmn:endEvent id="EndEvent_PaymentTimeout" name="Payment timed out">
+      <bpmn:incoming>Flow_1opf6i7</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_1inlq2z" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1opf6i7" sourceRef="UpdateOrderStatusToPaymentTimeout" targetRef="EndEvent_PaymentTimeout" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="process_order_fulfillment">
@@ -450,6 +469,22 @@
         <omgdc:Bounds x="2505" y="345" width="50" height="50" />
         <bpmndi:BPMNLabel>
           <omgdc:Bounds x="2446" y="363" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1m4brpc" bpmnElement="UpdateOrderStatusToPaymentTimeout">
+        <omgdc:Bounds x="1520" y="900" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1to2x2o_di" bpmnElement="EndEvent_PaymentTimeout">
+        <omgdc:Bounds x="1732" y="922" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1713" y="965" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0mwvt5v_di" bpmnElement="TimerPaymentTimeout">
+        <omgdc:Bounds x="1482" y="600" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="1459" y="643" width="83" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_StartToGetOrder_di" bpmnElement="Flow_StartToGetOrder">
@@ -647,6 +682,15 @@
         <bpmndi:BPMNLabel>
           <omgdc:Bounds x="1390" y="72" width="40" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16w7bv3_di" bpmnElement="Flow_16w7bv3">
+        <omgdi:waypoint x="1518" y="618" />
+        <omgdi:waypoint x="1570" y="618" />
+        <omgdi:waypoint x="1570" y="900" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1opf6i7_di" bpmnElement="Flow_1opf6i7">
+        <omgdi:waypoint x="1620" y="940" />
+        <omgdi:waypoint x="1732" y="940" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
