@@ -21,10 +21,14 @@ public class ExtractFraudScoreWorker extends  AbstractJobWorker {
     @Override
     protected Map<String, Object> execute(ActivatedJob job) {
         if(!(job.getVariablesAsMap().get(ActivityParameters.FRAUD_ASSESSMENT) instanceof Map<?, ?> assessment)
+        || assessment.get(ActivityParameters.ASSESSMENT_ID) == null
         || !(assessment.get(SCORE) instanceof Number score) || !(assessment.get(REQUIRES_REVIEW) instanceof Boolean requiresReview)) {
-            throw new IllegalArgumentException("fraudAssessment.score/fraudAssessment.requiresReview missing from process variables");
+            throw new IllegalArgumentException("fraudAssessment.assessmentId / score / requiresReview missing from process variables");
         }
 
-        return Map.of(ActivityParameters.FRAUD_SCORE, score.intValue(), ActivityParameters.REQUIRES_FRAUD_REVIEW, requiresReview);
+        return Map.of(
+                ActivityParameters.ASSESSMENT_ID, String.valueOf(assessment.get(ActivityParameters.ASSESSMENT_ID)),
+                ActivityParameters.FRAUD_SCORE, score.intValue(),
+                ActivityParameters.REQUIRES_FRAUD_REVIEW, requiresReview);
     }
 }
