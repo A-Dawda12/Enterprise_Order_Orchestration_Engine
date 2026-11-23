@@ -193,7 +193,10 @@
     </bpmn:serviceTask>
     <bpmn:serviceTask id="CreateShipmentInShippingService" name="CreateShipmentInShippingService">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="CreateShipmentInShippingService" />
+        <zeebe:taskDefinition type="CreateShipmentInShippingService" retries="3" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="retryBackoff" value="PT30S" />
+        </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1rg1d97</bpmn:incoming>
       <bpmn:outgoing>Flow_02m35dy</bpmn:outgoing>
