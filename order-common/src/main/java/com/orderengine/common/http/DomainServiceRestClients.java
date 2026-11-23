@@ -5,15 +5,21 @@ import com.orderengine.common.error.ApiErrorResponse;
 import com.orderengine.common.error.DomainServiceException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 
 public final class DomainServiceRestClients {
+
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
 
     private DomainServiceRestClients(){
     }
@@ -24,6 +30,7 @@ public final class DomainServiceRestClients {
             ObjectMapper objectMapper
     ) {
         return OrderEngineRestClients.customizer(builder)
+                .requestFactory(new JdkClientHttpRequestFactory(HTTP_CLIENT))
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                     throw toException(serviceName, response, objectMapper);
                 });

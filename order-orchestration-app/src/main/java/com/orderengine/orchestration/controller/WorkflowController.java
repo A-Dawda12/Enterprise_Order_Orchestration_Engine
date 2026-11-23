@@ -7,6 +7,7 @@ import com.orderengine.orchestration.api.dto.WorkflowInstanceResponse;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,15 +25,18 @@ import java.util.Map;
 public class WorkflowController {
 
     private final ZeebeClient zeebeClient;
+    private final Duration paymentTimeout;
 
-    WorkflowController(ZeebeClient zeebeClient){
+    WorkflowController(ZeebeClient zeebeClient, @Value("${orchestration.payment-timeout:PT15M}") Duration paymentTimeout){
         this.zeebeClient = zeebeClient;
+        this.paymentTimeout = paymentTimeout;
     }
 
     @PostMapping("/processes/order-fulfillment/start")
     ResponseEntity<WorkflowInstanceResponse> start(@Valid @RequestBody StartWorkflowRequest request) {
         Map<String, Object> variables = new HashMap<>();
         variables.put(ActivityParameters.ORDER_ID, request.orderId().toString());
+        variables.put(ActivityParameters.PAYMENT_TIMEOUT, paymentTimeout.toString());
         variables.put(ActivityParameters.PAYMENT_METHOD_TOKEN, request.paymentMethodToken());
 
         ProcessInstanceEvent instance = zeebeClient.newCreateInstanceCommand()

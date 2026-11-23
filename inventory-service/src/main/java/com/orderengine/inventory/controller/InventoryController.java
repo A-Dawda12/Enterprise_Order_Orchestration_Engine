@@ -41,14 +41,14 @@ public class InventoryController {
                 .body(InventoryApiMapper.toReservationResponse(created));
     }
 
-    @DeleteMapping("/reservation/{reservationId}")
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> release(@PathVariable String reservationId) {
         log.info("release reservationId={}", reservationId);
         inventoryService.release(reservationId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/reservation/{reservationId}/confirm")
+    @PostMapping("/reservations/{reservationId}/confirm")
     public ReservationResponse confirm(@PathVariable String reservationId) {
         log.info("confirm reservationId={}", reservationId);
         ReservationEntity confirmed = inventoryService.confirm(reservationId);

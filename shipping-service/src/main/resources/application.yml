@@ -48,3 +48,7 @@ orderengine:
   idempotency:
     enabled: true
     ttl: 24h
+
+shipping:
+  stub:
+    fail-first-n-calls: ${SHIPPING_FAIL_FIRST_N:0}

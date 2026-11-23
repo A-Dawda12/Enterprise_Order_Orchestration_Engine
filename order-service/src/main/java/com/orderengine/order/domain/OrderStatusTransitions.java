@@ -17,6 +17,7 @@ public class OrderStatusTransitions {
         ));
         ALLOWED.put(OrderStatus.VALIDATED, EnumSet.of(
                 OrderStatus.PROCESSING,
+                OrderStatus.PAYMENT_TIMEOUT,
                 OrderStatus.REJECTED,
                 OrderStatus.CANCELLED
         ));
@@ -33,6 +34,7 @@ public class OrderStatusTransitions {
         ));
         ALLOWED.put(OrderStatus.FRAUD_REVIEW, EnumSet.of(
                 OrderStatus.PAID,
+                OrderStatus.PAYMENT_TIMEOUT,
                 OrderStatus.REJECTED,
                 OrderStatus.COMPENSATING,
                 OrderStatus.CANCELLED

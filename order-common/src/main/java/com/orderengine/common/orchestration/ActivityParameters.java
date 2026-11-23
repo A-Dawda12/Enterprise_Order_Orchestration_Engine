@@ -14,6 +14,7 @@ public final class ActivityParameters {
     public static final String AUTHORIZE_REQUEST = "authorizeRequest";
     public static final String PAYMENT_ID = "paymentId";
     public static final String PAYMENT = "payment";
+    public static final String PAYMENT_TIMEOUT = "paymentTimeout";
     public static final String FRAUD_ASSESSMENT = "fraudAssessment";
     public static final String FRAUD_SCORE = "fraudScore";
     public static final String REQUIRES_FRAUD_REVIEW = "requiresFraudReview";
@@ -29,6 +30,7 @@ public final class ActivityParameters {
     public static final String ASSESSMENT_ID = "assessmentId";
     public static final String REVIEWER_ID = "reviewerId";
     public static final String REVIEW_NOTES = "reviewNotes";
+    public static final String REFUND = "refund";
 
     private ActivityParameters() {
 

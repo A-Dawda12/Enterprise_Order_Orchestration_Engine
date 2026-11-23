@@ -71,6 +71,7 @@ public class HandlerActivityName {
 // ==========================================================
 
     public static final String GATEWAY_COMPENSATION_ENTRY = "Gateway_CompensationEntry";
+    public static final String UPDATE_ORDER_STATUS_TO_COMPENSATING = "UpdateOrderStatusToCompensating";
     public static final String VOID_PAYMENT_IN_PAYMENT_SERVICE = "VoidPaymentInPaymentService";
     public static final String REFUND_PAYMENT_IN_PAYMENT_SERVICE = "RefundPaymentInPaymentService";
     public static final String GATEWAY_PAYMENT_COMPENSATION_TYPE = "Gateway_PaymentCompensationType";
